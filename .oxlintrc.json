@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": { "browser": true, "es2024": true },
+  "rules": {
+    "no-underscore-dangle": ["warn", { "allow": ["__APP_VERSION__"] }]
+  },
+  "ignorePatterns": ["dist/**", "coverage/**", "initial-context/**"],
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "vitest-setup.ts"],
+      "env": { "browser": true, "es2024": true }
+    }
+  ]
+}

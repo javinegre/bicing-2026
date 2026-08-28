@@ -1,0 +1,98 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens are the "consistency pass" from the design handoff (turn 3a): one
+ * hairline alpha, three text greys, one accent red, three radii, one small-caps
+ * label style. Anything not in this block is a drift, not a decision.
+ */
+@theme {
+  --font-sans: 'Barlow', system-ui, sans-serif;
+  --font-condensed: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  /* Surfaces, darkest to lightest. */
+  --color-tabbar: #0d0b0b;
+  --color-canvas: #100d0d;
+  --color-sheet: #141010;
+  --color-panel: #171313;
+  --color-grabber: #4a4240;
+  --color-divider: #3a3232;
+
+  /* The only hairline in the design. */
+  --color-hairline: rgba(255, 255, 255, 0.12);
+
+  /* Three text jobs: primary, secondary, label. */
+  --color-ink: #ffffff;
+  --color-ink-secondary: rgba(255, 255, 255, 0.72);
+  --color-ink-label: rgba(255, 255, 255, 0.42);
+
+  /* One accent; the gradient is reserved for primary actions. */
+  --color-accent: #ff224a;
+  --color-accent-deep: #c11104;
+
+  /* Resource colours — shared by the availability bar, ring and legend. */
+  --color-mech: #ff0000;
+  --color-elec: #ffcc00;
+  --color-dock: #808080;
+  --color-track: rgba(255, 255, 255, 0.16);
+
+  /* Marker / status dot scale. Mirrors marker-palette.ts — keep in sync. */
+  --color-state-green: #aacc22;
+  --color-state-orange: #ff9900;
+  --color-state-red: #dd0033;
+  --color-state-black: #222222;
+  --color-state-gray: #bbbbbb;
+
+  /* Map furniture drawn over Google's tiles. */
+  --color-geo: #406090;
+
+  --radius-surface: 16px;
+  --radius-sheet: 23px;
+
+  --shadow-sheet: 0 -10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-control: 0 3px 10px rgba(0, 0, 0, 0.35);
+  --shadow-infobar: 0 8px 22px rgba(140, 10, 4, 0.4);
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  /* Counts sit in columns and change width as digits change; without this they
+     jitter on every 60 s refresh. */
+  [data-count] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@utility gradient-accent {
+  background-image: linear-gradient(135deg, var(--color-accent-deep) 0%, var(--color-accent) 100%);
+}
+
+/* The one small-caps label style. Barlow Condensed 300 / 10px / .16em. */
+@utility label-caps {
+  font-family: var(--font-condensed);
+  font-weight: 300;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-label);
+}
+
+/* Glass control chrome floating over the map. */
+@utility control-glass {
+  background: rgba(16, 13, 13, 0.88);
+  border: 1px solid var(--color-hairline);
+}

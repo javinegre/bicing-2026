@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client", "google.maps", "@testing-library/jest-dom"],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+
+    // TypeScript 6 deprecates `baseUrl`; `paths` alone resolves fine and Vite
+    // 8 reads the same mapping natively via `resolve.tsconfigPaths`.
+    "paths": {
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"]
+    }
+  },
+  "include": ["src/**/*", "*.ts", "*.config.ts", "vitest-setup.ts"]
+}

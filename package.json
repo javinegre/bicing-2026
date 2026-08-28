@@ -1,0 +1,42 @@
+{
+  "name": "@negre-co/bicing-2026",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bicing 2026 — Barcelona bike-share map",
+  "author": "javi.negre@gmail.com",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run check && vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "lint": "oxlint --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "validate": "npm run format:check && npm run lint && npm run check && npm run test"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.3.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/svelte": "5.4.2",
+    "@testing-library/user-event": "14.6.6",
+    "@types/google.maps": "3.66.0",
+    "jsdom": "30.0.1",
+    "oxlint": "1.80.0",
+    "prettier": "3.9.6",
+    "prettier-plugin-svelte": "4.1.1",
+    "svelte": "5.56.10",
+    "svelte-check": "4.7.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
+  },
+  "dependencies": {
+    "bits-ui": "2.19.0"
+  }
+}
