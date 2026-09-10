@@ -7,6 +7,7 @@
  * this is continuity rather than a new commitment — but it is a commitment.
  */
 const SCRIPT_ID = 'google-maps-js';
+const CALLBACK_NAME = '__bicing2026GoogleMapsCallback';
 
 let loader: Promise<typeof google.maps> | null = null;
 
@@ -19,30 +20,25 @@ export function loadGoogleMaps(): Promise<typeof google.maps> {
     return loader;
   }
 
-  // `loading=async` uses Google's dynamic-library bootstrap loader: the script
-  // tag itself only installs a stub `google.maps` namespace, and constructors
-  // like `Map`/`Marker` stay unavailable ("not a constructor") until their
-  // owning library is pulled in with `importLibrary`.
-  const importLibraries = () =>
-    Promise.all([google.maps.importLibrary('maps'), google.maps.importLibrary('marker')]).then(
-      () => google.maps,
-    );
-
   loader = new Promise((resolve, reject) => {
     if (typeof google !== 'undefined' && google.maps) {
-      importLibraries().then(resolve, reject);
+      resolve(google.maps);
       return;
     }
+
+    // Classic synchronous load via `callback`, matching the 2023 app: it
+    // populates `Map`/`Marker`/etc. directly on `google.maps`. The
+    // `loading=async` + `importLibrary` dynamic-import API only works paired
+    // with Google's own inline bootstrap-loader snippet — a plain injected
+    // script tag never gets `importLibrary` defined, so skip it entirely.
+    (window as unknown as Record<string, () => void>)[CALLBACK_NAME] = () => resolve(google.maps);
 
     const script = document.createElement('script');
     script.id = SCRIPT_ID;
     script.async = true;
     script.src =
       `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}` +
-      '&loading=async&v=weekly';
-    script.addEventListener('load', () => importLibraries().then(resolve, reject), {
-      once: true,
-    });
+      `&callback=${CALLBACK_NAME}`;
     script.addEventListener('error', () => reject(new Error('Google Maps failed to load')), {
       once: true,
     });
