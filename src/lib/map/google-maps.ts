@@ -19,9 +19,18 @@ export function loadGoogleMaps(): Promise<typeof google.maps> {
     return loader;
   }
 
+  // `loading=async` uses Google's dynamic-library bootstrap loader: the script
+  // tag itself only installs a stub `google.maps` namespace, and constructors
+  // like `Map`/`Marker` stay unavailable ("not a constructor") until their
+  // owning library is pulled in with `importLibrary`.
+  const importLibraries = () =>
+    Promise.all([google.maps.importLibrary('maps'), google.maps.importLibrary('marker')]).then(
+      () => google.maps,
+    );
+
   loader = new Promise((resolve, reject) => {
     if (typeof google !== 'undefined' && google.maps) {
-      resolve(google.maps);
+      importLibraries().then(resolve, reject);
       return;
     }
 
@@ -31,7 +40,9 @@ export function loadGoogleMaps(): Promise<typeof google.maps> {
     script.src =
       `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}` +
       '&loading=async&v=weekly';
-    script.addEventListener('load', () => resolve(google.maps), { once: true });
+    script.addEventListener('load', () => importLibraries().then(resolve, reject), {
+      once: true,
+    });
     script.addEventListener('error', () => reject(new Error('Google Maps failed to load')), {
       once: true,
     });
