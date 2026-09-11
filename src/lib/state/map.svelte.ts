@@ -38,16 +38,19 @@ class MapState {
   }
 
   /**
-   * Centres on a marker that was just pressed. The press also opens the
-   * detail sheet (up to 54% of the map height), so the pin is lifted by
-   * `liftPx` — the caller's map height / 4, mirroring the 2023 app's
-   * `setGMapsCenter` yOffset trick — to land in the band that stays visible
-   * above the sheet, whether the map was fully visible beforehand or the
-   * sheet was already open on a different station.
+   * Centres on a station that was just selected (marker press or a row in
+   * one of the station lists). Selecting also opens the detail sheet (up to
+   * 54% of the map height), so the pin is lifted by a quarter of the map's
+   * own height — mirroring the 2023 app's `setGMapsCenter` yOffset trick —
+   * to land in the band that stays visible above the sheet, whether the map
+   * was fully visible beforehand or the sheet was already open on a
+   * different station. Reads the map's own div rather than taking the
+   * height from the caller so every selection path can share one call.
    */
-  centerOnMarker(coords: Coordinates, liftPx: number): void {
+  centerOnMarker(coords: Coordinates): void {
     this.center = coords;
     this.handler?.panTo(coords);
+    const liftPx = (this.handler?.getDiv().clientHeight ?? 0) / 4;
     if (liftPx) this.handler?.panBy(0, liftPx);
   }
 

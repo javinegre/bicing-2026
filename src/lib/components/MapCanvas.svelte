@@ -93,10 +93,7 @@
       });
       marker.addListener('click', () => {
         uiState.select(station.id);
-        mapState.centerOnMarker(
-          { lat: station.lat, lng: station.lng },
-          (container?.clientHeight ?? 0) / 4,
-        );
+        mapState.centerOnMarker({ lat: station.lat, lng: station.lng });
       });
       markers.set(station.id, marker);
     }

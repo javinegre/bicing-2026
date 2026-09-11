@@ -18,8 +18,17 @@
   let dragStartY = $state<number | null>(null);
   let dragOffset = $state(0);
 
+  /**
+   * Closing hands the map back its full height, so the lift `centerOnMarker`
+   * applied to keep the pin clear of the sheet (see map.svelte.ts) is now a
+   * vertical offset with nothing to clear — undo it by re-centring on the
+   * selected station's real coordinates, putting it back in the middle of
+   * the now-full map instead of high in what was the visible band above the
+   * sheet.
+   */
   function dismiss(): void {
     uiState.closeSheet();
+    if (selected) mapState.panTo(selected);
   }
 
   /**
@@ -168,7 +177,10 @@
       <StationRow
         station={entry.station}
         distance={entry.walk}
-        onselect={(s) => uiState.select(s.id)}
+        onselect={(s) => {
+          uiState.select(s.id);
+          mapState.centerOnMarker(s);
+        }}
       />
     {:else}
       <p class="empty-list">
