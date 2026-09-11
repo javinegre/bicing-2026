@@ -211,8 +211,13 @@ in `nginx/negre.co.conf`.
 `apps/staging-bicing-2026` on the droplet, developed on and built in place:
 
 ```sh
-BASE_PATH=/staging-bicing-2026/ npm run build
+APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build
 ```
+
+`APP_ENV=staging` stamps `__APP_ENV__` (`vite.config.ts`), which the app reads
+to show a "Staging" badge and to suffix the build version on the Account
+screen — the only visual cue that this isn't the real production app, since it
+otherwise looks and behaves identically. Leaving it unset builds `production`.
 
 No PM2 reload is needed after a rebuild — `express.static` reads from disk per
 request. It is deliberately not on a `stg.` subdomain: `session.svelte.ts` and

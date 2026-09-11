@@ -4,7 +4,7 @@
   import { uiState } from '$lib/state/ui.svelte';
 
   /** Stamped at build time so a bug report can name the exact bundle. */
-  const build = __APP_VERSION__;
+  const build = __APP_ENV__ === 'staging' ? `${__APP_VERSION__} (staging)` : __APP_VERSION__;
 
   /**
    * Login and logout live in negre.co's shared auth app, not here — there is no

@@ -18,9 +18,21 @@ function appVersion(): string {
   }
 }
 
+/**
+ * Which of the two hand-deployed clones this bundle is. Set explicitly by the
+ * staging build command (`APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm
+ * run build`) rather than derived from BASE_PATH, so the two stay independent
+ * knobs — e.g. a local build against a staging-like path doesn't silently
+ * flip this.
+ */
+function appEnv(): 'production' | 'staging' {
+  return process.env.APP_ENV === 'staging' ? 'staging' : 'production';
+}
+
 export default defineConfig(({ mode }) => ({
   define: {
     __APP_VERSION__: JSON.stringify(appVersion()),
+    __APP_ENV__: JSON.stringify(appEnv()),
   },
 
   // negre.co-server mounts each app under a path prefix (nginx serves dist/

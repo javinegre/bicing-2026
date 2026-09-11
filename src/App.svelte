@@ -1,4 +1,5 @@
 <script lang="ts">
+  import StagingBadge from '$lib/components/StagingBadge.svelte';
   import TabBar from '$lib/components/TabBar.svelte';
   import AccountScreen from '$lib/screens/AccountScreen.svelte';
   import InfoScreen from '$lib/screens/InfoScreen.svelte';
@@ -43,6 +44,10 @@
 </script>
 
 <div class="app">
+  {#if __APP_ENV__ === 'staging'}
+    <StagingBadge />
+  {/if}
+
   {#if !booted}
     <div class="boot" role="status">Loading…</div>
   {:else if uiState.tab === 'map'}
