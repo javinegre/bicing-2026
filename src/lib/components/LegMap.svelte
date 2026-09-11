@@ -2,8 +2,10 @@
   import { getMarkerIconUrl } from '$lib/icons/marker-icon';
   import { loadGoogleMaps } from '$lib/map/google-maps';
   import { mapOptions } from '$lib/map/map-options';
+  import { isNearby } from '$lib/domain/distance';
   import { stationColor } from '$lib/domain/station';
   import { prefsState } from '$lib/state/prefs.svelte';
+  import { stationsState } from '$lib/state/stations.svelte';
   import type { ResourceType, Station } from '$lib/domain/types';
 
   interface Props {
@@ -17,8 +19,13 @@
   const ZOOM = 15;
 
   let container = $state<HTMLDivElement | null>(null);
+  let ready = $state(false);
   let map: google.maps.Map | null = null;
-  let marker: google.maps.Marker | null = null;
+
+  let mainMarker: google.maps.Marker | null = null;
+  /** Everything within a 5 min walk of the selected station, keyed by id so a
+   *  60 s status refresh recolours in place instead of recreating markers. */
+  const nearbyMarkers = new Map<number, google.maps.Marker>();
 
   /**
    * Built once per mount, not once per station change — recreating the map on
@@ -44,15 +51,7 @@
           scrollwheel: false,
           disableDoubleClickZoom: true,
         });
-        marker = new maps.Marker({
-          map,
-          position: { lat: station.lat, lng: station.lng },
-          icon: getMarkerIconUrl(
-            resource,
-            'big',
-            stationColor(station, resource, prefsState.bikeTypeFilter),
-          ),
-        });
+        ready = true;
       })
       .catch(() => {
         // Silent: the leg's hatched background stays visible underneath.
@@ -60,22 +59,66 @@
 
     return () => {
       disposed = true;
-      marker?.setMap(null);
-      marker = null;
+      ready = false;
+      mainMarker?.setMap(null);
+      mainMarker = null;
+      for (const marker of nearbyMarkers.values()) marker.setMap(null);
+      nearbyMarkers.clear();
       map = null;
     };
   });
 
-  // Reposition and recolour in place when the station, its live counts, or
-  // the shown resource changes, instead of tearing the map down.
+  // Recentres only when the selected station itself changes — not on every
+  // status poll below, which would otherwise fight a pan the person just made.
   $effect(() => {
-    if (!map || !marker) return;
+    if (!ready || !map) return;
+    map.setCenter({ lat: station.lat, lng: station.lng });
+  });
+
+  // Reconciles the selected station's own marker plus everything within a
+  // 5 min walk of it, re-running on the station, its live counts, the shown
+  // resource, and the bike-type filter — without touching the map's centre.
+  $effect(() => {
+    if (!ready || !map) return;
+    const currentMap = map;
+    const filter = prefsState.bikeTypeFilter;
     const position = { lat: station.lat, lng: station.lng };
-    marker.setPosition(position);
-    marker.setIcon(
-      getMarkerIconUrl(resource, 'big', stationColor(station, resource, prefsState.bikeTypeFilter)),
-    );
-    map.setCenter(position);
+
+    if (!mainMarker) {
+      mainMarker = new google.maps.Marker({ map: currentMap, position });
+    } else {
+      mainMarker.setPosition(position);
+    }
+    mainMarker.setIcon(getMarkerIconUrl(resource, 'big', stationColor(station, resource, filter)));
+
+    const seen = new Set<number>();
+    for (const nearby of stationsState.all) {
+      if (nearby.id === station.id) continue;
+      if (!isNearby(nearby, station)) continue;
+      seen.add(nearby.id);
+
+      const icon = getMarkerIconUrl(resource, 'small', stationColor(nearby, resource, filter));
+      const existing = nearbyMarkers.get(nearby.id);
+      if (existing) {
+        existing.setIcon(icon);
+        continue;
+      }
+
+      nearbyMarkers.set(
+        nearby.id,
+        new google.maps.Marker({
+          map: currentMap,
+          position: { lat: nearby.lat, lng: nearby.lng },
+          icon,
+        }),
+      );
+    }
+
+    for (const [id, marker] of nearbyMarkers) {
+      if (seen.has(id)) continue;
+      marker.setMap(null);
+      nearbyMarkers.delete(id);
+    }
   });
 </script>
 
