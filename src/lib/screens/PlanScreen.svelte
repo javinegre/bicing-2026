@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte';
+  import LegMap from '$lib/components/LegMap.svelte';
   import { resourceCount } from '$lib/domain/station';
   import { planState } from '$lib/state/plan.svelte';
   import { uiState } from '$lib/state/ui.svelte';
@@ -48,6 +49,7 @@
         style:flex={leg.grow}
       >
         {#if leg.station}
+          <LegMap station={leg.station} resource={leg.resource} />
           <!-- The whole half is the hit target for "give this leg the space",
                so the caption and counts live inside the button; a second
                control alongside it would nest interactive elements. -->
