@@ -146,8 +146,8 @@
     min-height: 0;
     overflow: hidden;
     background:
-      repeating-linear-gradient(0deg, #242020 0 12px, transparent 12px 58px),
-      repeating-linear-gradient(90deg, #242020 0 12px, transparent 12px 58px), #141010;
+      repeating-linear-gradient(45deg, #242020 0 12px, transparent 12px 58px),
+      repeating-linear-gradient(135deg, #242020 0 12px, transparent 12px 58px), #141010;
     color: var(--color-ink);
     transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
