@@ -51,8 +51,8 @@ class PlanState {
     this.#settle();
   }
 
-  /** Cancel keeps the origin — you are usually still starting from the same place. */
   cancel(): void {
+    this.origin = null;
     this.destination = null;
     this.mode = 'inactive';
   }

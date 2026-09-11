@@ -62,11 +62,11 @@ describe('planState', () => {
     expect(planState.topGrow).toBe(35);
   });
 
-  it('cancel keeps the origin and drops back to the even split', () => {
+  it('cancel clears both legs and drops back to the even split', () => {
     planState.add(rossello);
     planState.add(llull);
     planState.cancel();
-    expect(planState.origin).toEqual(rossello);
+    expect(planState.origin).toBeNull();
     expect(planState.destination).toBeNull();
     expect(planState.topGrow).toBe(50);
   });
