@@ -4,9 +4,9 @@ Barcelona bike-share map. Successor to [bicing-2023](https://github.com/javinegr
 rebuilt on Svelte 5 with per-user settings stored server-side instead of in
 `localStorage`.
 
-Deployed as static files under negre.co; nginx serves `dist/` directly and
-[negre.co-server](https://github.com/javinegre/negre.co-server) provides the API
-and the shared sign-in.
+Deployed as static files under negre.co by
+[negre.co-server](https://github.com/javinegre/negre.co-server), which also
+provides the API and the shared sign-in.
 
 ## Quick start
 
@@ -30,6 +30,9 @@ npm run dev
 
 `BASE_PATH=/bicing-2026/ npm run build` while this runs alongside the 2023 app;
 the default is `/bicing/`.
+
+A staging build lives at `https://negre.co/staging-bicing-2026/` — see
+[Deploying](#deploying).
 
 ## Stack, and why
 
@@ -197,8 +200,35 @@ Things that cost real time to rediscover, and how this repo handles them.
 
 ## Deploying
 
-Built as static files. negre.co-server mounts them; nginx serves `dist/`
-directly, bypassing Node.
+Built as static files, mounted by negre.co-server. Note that `/bicing-2026/`
+is currently served by that router's `express.static`, not by an nginx alias —
+only `/files`, `/.well-known`, `/bicing/` and `/bicing-2021/` have alias blocks
+in `nginx/negre.co.conf`.
+
+### Staging
+
+`https://negre.co/staging-bicing-2026/` is a second clone of this repo at
+`apps/staging-bicing-2026` on the droplet, developed on and built in place:
+
+```sh
+BASE_PATH=/staging-bicing-2026/ npm run build
+```
+
+No PM2 reload is needed after a rebuild — `express.static` reads from disk per
+request. It is deliberately not on a `stg.` subdomain: `session.svelte.ts` and
+`AccountScreen.svelte` hardcode `/api/auth/get-session`, `/api/auth/sign-out`
+and `/login` as origin-relative paths with no env override, and `apiFetch`
+sends `credentials: 'include'`. Off negre.co the session fetch 404s into a
+swallowed `catch` (the app then renders permanently signed out, showing no
+error) and the config endpoints would need CORS with credentials. Staying
+same-origin also means the referrer-restricted Maps key needs no change.
+
+Leave `VITE_BICING_API_BASE_URL` at its default there. Staging shares
+production's per-user config document, so a settings change in staging is a
+real settings change — and because `PUT /v2/config` rejects unknown keys,
+testing a brand-new setting still needs the `bicing-api` change shipped first.
+
+### Server-side mounts
 
 The per-user config API needs its route mounted in negre.co-server's
 `server.ts`, _ahead_ of the general Bicing API mount so `requireAuth` wraps only

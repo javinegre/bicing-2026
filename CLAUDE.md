@@ -7,7 +7,9 @@ Guidance for Claude Code (claude.ai/code) working in this repository.
 `bicing-2026` — a Barcelona bike-share map. Plain **Svelte 5 + Vite**, no
 SvelteKit, no router, no SSR: it builds to static files that
 [negre.co-server](https://github.com/javinegre/negre.co-server) serves under
-negre.co (nginx serves `dist/` directly, bypassing Node).
+negre.co. Note that `/bicing-2026/` is served by that router's
+`express.static`, not by an nginx alias — only `/files`, `/.well-known`,
+`/bicing/` and `/bicing-2021/` have alias blocks there.
 
 It is its own git repo, checked out as a sibling under that router's `apps/`
 directory. That parent repo gitignores `apps/`, which has one consequence worth
@@ -38,6 +40,18 @@ Maps browser key before `npm run dev`; without one every screen still works and
 the map shows an explanatory message.
 
 `BASE_PATH=/bicing-2026/ npm run build` to deploy alongside the 2023 app.
+
+There is a **staging deploy** at `https://negre.co/staging-bicing-2026/` — a
+second clone of this repo at `apps/staging-bicing-2026` on the droplet, built
+in place with `BASE_PATH=/staging-bicing-2026/ npm run build`. It is on
+negre.co rather than a `stg.` subdomain on purpose: `session.svelte.ts` and
+`AccountScreen.svelte` resolve `/api/auth/get-session`, `/api/auth/sign-out`
+and `/login` as origin-relative literals that no env var overrides, and off
+that origin the session fetch 404s into a swallowed `catch` — the app renders
+permanently signed out with no error. Leave `VITE_BICING_API_BASE_URL` at its
+default there; same-origin is what keeps the cookie, the passkey RP and the
+referrer-restricted Maps key working. Staging shares the production config
+document, so changing a setting there changes it for real.
 
 ## Where things live
 
