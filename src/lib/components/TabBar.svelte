@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from './Icon.svelte';
-  import { uiState, type Tab } from '$lib/state/ui.svelte';
+  import { uiState } from '$lib/state/ui.svelte';
+  import type { Tab } from '$lib/domain/routes';
   import type { IconName } from '$lib/icons';
 
   const TAB_META: Record<Tab, { icon: IconName; label: string }> = {

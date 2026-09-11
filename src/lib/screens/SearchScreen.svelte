@@ -37,7 +37,8 @@
       <input
         type="search"
         placeholder="Search stations"
-        bind:value={uiState.searchQuery}
+        value={uiState.searchQuery}
+        oninput={(e) => uiState.setSearchQuery(e.currentTarget.value)}
         aria-label="Search stations"
       />
       {#if uiState.searchQuery}
@@ -45,7 +46,7 @@
           type="button"
           class="clear"
           aria-label="Clear search"
-          onclick={() => (uiState.searchQuery = '')}
+          onclick={() => uiState.setSearchQuery('')}
         >
           <Icon name="close" size={11} />
         </button>

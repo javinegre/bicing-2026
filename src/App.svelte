@@ -14,6 +14,10 @@
   import { stationsState } from '$lib/state/stations.svelte';
   import { uiState } from '$lib/state/ui.svelte';
 
+  function onPopState() {
+    uiState.syncFromLocation();
+  }
+
   /**
    * Boot order matters: the session decides whether preferences come from the
    * account or from this device, and preferences carry the map view the user
@@ -40,6 +44,15 @@
     };
   });
 
+  // Mirrors browser back/forward into ui state without recording new
+  // history — the browser already owns those entries. See ui.svelte.ts's
+  // push/replace-vs-sync split for why a reactive `$effect` on `uiState.tab`
+  // can't do this instead (it would double-push on every popstate).
+  $effect(() => {
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  });
+
   // Dynamic import so the toolbar (and its dependency weight) never ships to
   // production — only staging and local dev get the 21st.dev browser toolbar.
   $effect(() => {
@@ -57,6 +70,14 @@
   });
 
   const booted = $derived(sessionState.status === 'ready' && prefsState.loaded);
+
+  // A deep link (or a sign-out) can leave `tab` pointing at a slot that
+  // isn't in the bar for this session — e.g. /search while signed out.
+  // Runs once booted, and again any time `visibleTabs` or `tab` change, so
+  // it also catches signing out while sitting on Search/Saved.
+  $effect(() => {
+    if (booted && !uiState.visibleTabs.includes(uiState.tab)) uiState.redirectToMap();
+  });
 </script>
 
 <div class="app">
