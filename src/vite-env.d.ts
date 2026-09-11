@@ -12,3 +12,6 @@ interface ImportMeta {
 
 /** Injected by vite.config.ts `define` — the short commit the bundle was built from. */
 declare const __APP_VERSION__: string;
+
+/** Injected by vite.config.ts `define` — which deploy this bundle is. */
+declare const __APP_ENV__: 'production' | 'staging' | 'development';

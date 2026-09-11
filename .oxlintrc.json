@@ -7,7 +7,7 @@
   },
   "env": { "browser": true, "es2024": true },
   "rules": {
-    "no-underscore-dangle": ["warn", { "allow": ["__APP_VERSION__"] }]
+    "no-underscore-dangle": ["warn", { "allow": ["__APP_VERSION__", "__APP_ENV__"] }]
   },
   "ignorePatterns": ["dist/**", "coverage/**", "initial-context/**"],
   "overrides": [
