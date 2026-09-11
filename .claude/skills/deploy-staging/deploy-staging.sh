@@ -26,6 +26,8 @@ git push --force-with-lease origin "HEAD:staging"
 echo "==> Deploying on $DROPLET_HOST"
 ssh "$DROPLET_HOST" bash -s <<EOF
 set -euo pipefail
+export NVM_DIR="\$HOME/.nvm"
+[ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
 cd "$STAGING_DIR"
 
 echo "--> git status before reset (should normally be empty on a deploy-only clone):"
