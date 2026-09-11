@@ -4,6 +4,7 @@
   import { mapState } from '$lib/state/map.svelte';
   import { prefsState } from '$lib/state/prefs.svelte';
   import { stationsState } from '$lib/state/stations.svelte';
+  import { uiState } from '$lib/state/ui.svelte';
 
   /**
    * Totals for the ~340 m circle drawn on the map, counting in-service stations
@@ -23,7 +24,18 @@
   const bikes = $derived(totals.mechanical + totals.electrical);
 </script>
 
-<div class="infobar gradient-accent">
+<div
+  class="infobar gradient-accent"
+  role="button"
+  tabindex="0"
+  aria-label="Around here"
+  onclick={() => uiState.select(null)}
+  onkeydown={(event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    uiState.select(null);
+  }}
+>
   <div class="total">
     <span class="total-value" data-count>{bikes}</span>
     <Icon name="bike" size={21} class="total-icon" />
@@ -35,7 +47,10 @@
       class="chip"
       class:on={prefsState.bikeTypeFilter === 'mechanical'}
       aria-pressed={prefsState.bikeTypeFilter === 'mechanical'}
-      onclick={() => prefsState.toggleBikeTypeFilter('mechanical')}
+      onclick={(event) => {
+        event.stopPropagation();
+        prefsState.toggleBikeTypeFilter('mechanical');
+      }}
     >
       <span data-count>{totals.mechanical}</span>
       <Icon name="bike" size={14} />
@@ -45,7 +60,10 @@
       class="chip"
       class:on={prefsState.bikeTypeFilter === 'electrical'}
       aria-pressed={prefsState.bikeTypeFilter === 'electrical'}
-      onclick={() => prefsState.toggleBikeTypeFilter('electrical')}
+      onclick={(event) => {
+        event.stopPropagation();
+        prefsState.toggleBikeTypeFilter('electrical');
+      }}
     >
       <span data-count>{totals.electrical}</span>
       <Icon name="bolt" size={11} />
@@ -74,6 +92,7 @@
     border-radius: var(--radius-surface);
     border: 1px solid var(--color-hairline);
     box-shadow: var(--shadow-infobar);
+    cursor: pointer;
   }
 
   .total {

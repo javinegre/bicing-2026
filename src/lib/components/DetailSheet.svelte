@@ -19,7 +19,7 @@
   let dragOffset = $state(0);
 
   function dismiss(): void {
-    uiState.select(null);
+    uiState.closeSheet();
   }
 
   /**
@@ -28,6 +28,7 @@
    * start inside `.list` — that region owns its own vertical scroll.
    */
   function handleDragStart(event: TouchEvent): void {
+    if (!uiState.sheetOpen) return;
     if ((event.target as HTMLElement).closest('.list')) return;
     const touch = event.touches[0];
     if (!touch) return;
@@ -85,7 +86,10 @@
 
 <section
   class="sheet"
+  class:closed={!uiState.sheetOpen}
   aria-label="Station detail"
+  aria-hidden={!uiState.sheetOpen}
+  inert={!uiState.sheetOpen}
   style:transform={dragOffset ? `translateY(${dragOffset}px)` : undefined}
   style:transition={dragStartY === null ? undefined : 'none'}
   ontouchstart={handleDragStart}
@@ -191,6 +195,11 @@
     box-shadow: var(--shadow-sheet);
     transition: transform 0.2s ease;
     touch-action: none;
+  }
+
+  .sheet.closed {
+    transform: translateY(100%);
+    pointer-events: none;
   }
 
   .grabber {
