@@ -40,6 +40,22 @@
     };
   });
 
+  // Dynamic import so the toolbar (and its dependency weight) never ships to
+  // production — only staging and local dev get the 21st.dev browser toolbar.
+  $effect(() => {
+    if (__APP_ENV__ === 'production') return;
+
+    let cancelled = false;
+    void import('@21st-extension/toolbar').then(({ initToolbar }) => {
+      if (cancelled) return;
+      initToolbar({ plugins: [] });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  });
+
   const booted = $derived(sessionState.status === 'ready' && prefsState.loaded);
 </script>
 
