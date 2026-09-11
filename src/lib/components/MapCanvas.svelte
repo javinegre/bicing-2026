@@ -91,7 +91,13 @@
         icon,
         title: station.name,
       });
-      marker.addListener('click', () => uiState.select(station.id));
+      marker.addListener('click', () => {
+        uiState.select(station.id);
+        mapState.centerOnMarker(
+          { lat: station.lat, lng: station.lng },
+          (container?.clientHeight ?? 0) / 4,
+        );
+      });
       markers.set(station.id, marker);
     }
 

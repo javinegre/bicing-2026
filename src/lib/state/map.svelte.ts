@@ -37,6 +37,20 @@ class MapState {
     if (zoom !== undefined) this.handler?.setZoom(zoom);
   }
 
+  /**
+   * Centres on a marker that was just pressed. The press also opens the
+   * detail sheet (up to 54% of the map height), so the pin is lifted by
+   * `liftPx` — the caller's map height / 4, mirroring the 2023 app's
+   * `setGMapsCenter` yOffset trick — to land in the band that stays visible
+   * above the sheet, whether the map was fully visible beforehand or the
+   * sheet was already open on a different station.
+   */
+  centerOnMarker(coords: Coordinates, liftPx: number): void {
+    this.center = coords;
+    this.handler?.panTo(coords);
+    if (liftPx) this.handler?.panBy(0, liftPx);
+  }
+
   zoomBy(delta: number): void {
     const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, this.zoom + delta));
     this.zoom = next;
