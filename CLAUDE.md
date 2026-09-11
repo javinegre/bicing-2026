@@ -44,11 +44,12 @@ the map shows an explanatory message.
 There is a **staging deploy** at `https://negre.co/staging-bicing-2026/` — a
 second clone of this repo at `apps/staging-bicing-2026` on the droplet, built
 in place with `APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build`.
-`APP_ENV` (default `production`) is a separate knob from `BASE_PATH` — it stamps
-`__APP_ENV__` (`vite.config.ts`), which drives the "Staging" badge
-(`StagingBadge.svelte`, mounted from `App.svelte`) and the build-version suffix
-on the Account screen. It is on negre.co rather than a `stg.` subdomain on
-purpose: `session.svelte.ts` and `AccountScreen.svelte` resolve
+`APP_ENV` (default `production`, also accepts `development` — reserved for a
+future local-laptop setup, not wired to anything yet) is a separate knob from
+`BASE_PATH` — it stamps `__APP_ENV__` (`vite.config.ts`), which drives the
+env badge (`EnvBadge.svelte`, mounted from `App.svelte`) and the build-version
+suffix on the Account screen. It is on negre.co rather than a `stg.` subdomain
+on purpose: `session.svelte.ts` and `AccountScreen.svelte` resolve
 `/api/auth/get-session`, `/api/auth/sign-out` and `/login` as origin-relative
 literals that no env var overrides, and off that origin the session fetch
 404s into a swallowed `catch` — the app renders permanently signed out with no

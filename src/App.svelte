@@ -1,5 +1,5 @@
 <script lang="ts">
-  import StagingBadge from '$lib/components/StagingBadge.svelte';
+  import EnvBadge from '$lib/components/EnvBadge.svelte';
   import TabBar from '$lib/components/TabBar.svelte';
   import AccountScreen from '$lib/screens/AccountScreen.svelte';
   import InfoScreen from '$lib/screens/InfoScreen.svelte';
@@ -44,8 +44,8 @@
 </script>
 
 <div class="app">
-  {#if __APP_ENV__ === 'staging'}
-    <StagingBadge />
+  {#if __APP_ENV__ !== 'production'}
+    <EnvBadge env={__APP_ENV__} />
   {/if}
 
   {#if !booted}
