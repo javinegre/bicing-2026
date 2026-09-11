@@ -12,6 +12,41 @@
   import { uiState } from '$lib/state/ui.svelte';
 
   const CLOSEST_SHOWN = 5;
+  const DRAG_DISMISS_THRESHOLD = 64;
+
+  /** Null while not dragging; the touch's starting Y while a drag is live. */
+  let dragStartY = $state<number | null>(null);
+  let dragOffset = $state(0);
+
+  function dismiss(): void {
+    uiState.select(null);
+  }
+
+  /**
+   * Drag-to-dismiss listens on the whole sheet rather than just the grabber
+   * so a swipe anywhere on the header area works, but bails out of drags that
+   * start inside `.list` — that region owns its own vertical scroll.
+   */
+  function handleDragStart(event: TouchEvent): void {
+    if ((event.target as HTMLElement).closest('.list')) return;
+    const touch = event.touches[0];
+    if (!touch) return;
+    dragStartY = touch.clientY;
+    dragOffset = 0;
+  }
+
+  function handleDragMove(event: TouchEvent): void {
+    if (dragStartY === null) return;
+    const touch = event.touches[0];
+    if (!touch) return;
+    dragOffset = Math.max(0, touch.clientY - dragStartY);
+  }
+
+  function handleDragEnd(): void {
+    if (dragOffset > DRAG_DISMISS_THRESHOLD) dismiss();
+    dragStartY = null;
+    dragOffset = 0;
+  }
 
   /** With nothing selected the sheet describes the map centre instead. */
   const selected = $derived(
@@ -48,8 +83,18 @@
   const canPlan = $derived(selected !== null && planState.canAdd(selected));
 </script>
 
-<section class="sheet" aria-label="Station detail">
-  <div class="grabber"></div>
+<section
+  class="sheet"
+  aria-label="Station detail"
+  style:transform={dragOffset ? `translateY(${dragOffset}px)` : undefined}
+  style:transition={dragStartY === null ? undefined : 'none'}
+  ontouchstart={handleDragStart}
+  ontouchmove={handleDragMove}
+  ontouchend={handleDragEnd}
+  ontouchcancel={handleDragEnd}
+>
+  <button type="button" class="grabber" aria-label="Dismiss station detail" onclick={dismiss}
+  ></button>
 
   {#if selected}
     <header class="head">
@@ -144,15 +189,21 @@
     background: var(--color-sheet);
     border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     box-shadow: var(--shadow-sheet);
+    transition: transform 0.2s ease;
+    touch-action: none;
   }
 
   .grabber {
     width: 44px;
     height: 4px;
     flex: none;
+    display: block;
     border-radius: 2px;
+    border: 0;
+    padding: 0;
     background: var(--color-grabber);
     margin: 0 auto 16px;
+    cursor: pointer;
   }
 
   .head {
@@ -274,6 +325,9 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-bottom: 12px;
+    /* Overrides the sheet's `touch-action: none` (needed for drag-to-dismiss)
+       so this region keeps its own vertical touch scroll. */
+    touch-action: pan-y;
   }
 
   .empty-list {

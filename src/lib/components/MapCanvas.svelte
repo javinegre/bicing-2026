@@ -62,7 +62,11 @@
 
   // Re-runs whenever the station data, the shown resource, the bike filter or
   // the marker size changes — each of which changes some markers' icons.
+  // Also gated on `mapState.ready` (rather than reading `handler` alone):
+  // `handler` is a plain, non-reactive property, so assigning it in the
+  // effect above never re-triggers this one on its own.
   $effect(() => {
+    if (!mapState.ready) return;
     const map = mapState.handler;
     if (!map) return;
 
