@@ -101,6 +101,7 @@
   inert={!uiState.sheetOpen}
   style:transform={dragOffset ? `translateY(${dragOffset}px)` : undefined}
   style:transition={dragStartY === null ? undefined : 'none'}
+  bind:clientHeight={uiState.sheetHeight}
   ontouchstart={handleDragStart}
   ontouchmove={handleDragMove}
   ontouchend={handleDragEnd}

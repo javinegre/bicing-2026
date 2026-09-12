@@ -1,12 +1,17 @@
 <script lang="ts">
+  import myLocationSvg from '$lib/icons/hints/my-location.svg?raw';
   import { getMarkerIconUrl } from '$lib/icons/marker-icon';
   import { loadGoogleMaps } from '$lib/map/google-maps';
   import { MARKER_SIZE_ZOOM_THRESHOLD, mapOptions } from '$lib/map/map-options';
   import { stationColor } from '$lib/domain/station';
+  import { geoState } from '$lib/state/geo.svelte';
   import { mapState } from '$lib/state/map.svelte';
   import { prefsState } from '$lib/state/prefs.svelte';
   import { stationsState } from '$lib/state/stations.svelte';
   import { uiState } from '$lib/state/ui.svelte';
+
+  /** Static, unlike the resource markers — built once rather than per render. */
+  const USER_LOCATION_ICON = `data:image/svg+xml,${encodeURIComponent(myLocationSvg)}`;
 
   let container = $state<HTMLDivElement | null>(null);
 
@@ -103,6 +108,28 @@
       marker.setMap(null);
       markers.delete(id);
     }
+  });
+
+  /**
+   * The device's own fix, separate from the ~500 station markers above: it
+   * changes only after a fresh `locate()` call, not on every 60 s refresh, so
+   * a plain create/destroy per change is simpler than reconciling by id.
+   */
+  $effect(() => {
+    if (!mapState.ready) return;
+    const map = mapState.handler;
+    const position = geoState.position;
+    if (!map || !position) return;
+
+    const marker = new google.maps.Marker({
+      map,
+      position,
+      icon: { url: USER_LOCATION_ICON, anchor: new google.maps.Point(12, 12) },
+      clickable: false,
+      zIndex: google.maps.Marker.MAX_ZINDEX + 1,
+    });
+
+    return () => marker.setMap(null);
   });
 </script>
 

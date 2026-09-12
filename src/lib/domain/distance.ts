@@ -32,3 +32,19 @@ export const NEARBY_RADIUS_M = 340;
 export function isNearby(point: Coordinates, center: Coordinates): boolean {
   return distanceMeters(point, center) <= NEARBY_RADIUS_M;
 }
+
+/** Google's tile size; zoom N means the world is TILE_SIZE_PX * 2^N pixels wide. */
+const TILE_SIZE_PX = 256;
+
+/**
+ * Converts a ground distance to on-screen pixels at a given latitude and zoom,
+ * matching Google Maps' Web Mercator scale — for sizing the dashed "nearby"
+ * circle drawn over the map, which is a screen-space overlay, not a real shape
+ * with its own coordinates.
+ */
+export function metersToPixels(meters: number, lat: number, zoom: number): number {
+  const metersPerPixel =
+    (2 * Math.PI * EARTH_RADIUS_M * Math.cos((lat * Math.PI) / 180)) /
+    (TILE_SIZE_PX * 2 ** zoom);
+  return meters / metersPerPixel;
+}

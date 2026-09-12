@@ -27,6 +27,11 @@ class UiState {
   /** Whether the detail sheet is visible at all. Off by default; a marker or
    *  the infobar opens it, the grabber or a downward drag closes it. */
   sheetOpen = $state(false);
+  /** The sheet's live rendered height in px, bound from DetailSheet's own
+   *  element — it only ever grows to fit its content, not to its `54%` CSS
+   *  cap, so anything positioning itself against "the top of the sheet" (the
+   *  map hints) needs the real number, not that cap. Stale while closed. */
+  sheetHeight = $state(0);
   searchQuery = $state(readSearchQuery(window.location.search));
 
   readonly visibleTabs = $derived(sessionState.signedIn ? SIGNED_IN_TABS : SIGNED_OUT_TABS);

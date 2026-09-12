@@ -3,10 +3,12 @@
   import InfoBar from '$lib/components/InfoBar.svelte';
   import MapCanvas from '$lib/components/MapCanvas.svelte';
   import MapControls from '$lib/components/MapControls.svelte';
+  import MapHints from '$lib/components/MapHints.svelte';
 </script>
 
 <div class="screen">
   <MapCanvas />
+  <MapHints />
   <InfoBar />
   <MapControls />
   <DetailSheet />
