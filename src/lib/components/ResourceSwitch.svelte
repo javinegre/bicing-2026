@@ -13,6 +13,18 @@
   function write(next: string) {
     if (next === 'bikes' || next === 'docks') prefsState.setResourceShown(next as ResourceType);
   }
+
+  /**
+   * Only two states exist, so any click inside the switch means "flip it" -
+   * including a tap on the already-active item, which Bits UI would
+   * otherwise treat as a deselect (a no-op, caught by `write` above). Handling
+   * the click on capture, before it reaches an item, and stopping it there
+   * keeps Bits UI's own item click logic from also firing and fighting this.
+   */
+  function toggleOnClick(event: MouseEvent) {
+    event.stopPropagation();
+    prefsState.setResourceShown(prefsState.resourceShown === 'bikes' ? 'docks' : 'bikes');
+  }
 </script>
 
 <ToggleGroup.Root
@@ -20,6 +32,7 @@
   bind:value={() => prefsState.resourceShown, write}
   class="switch"
   aria-label="Show bikes or docks"
+  onclickcapture={toggleOnClick}
 >
   <ToggleGroup.Item value="bikes" class="switch-item" aria-label="Bikes">
     <Icon name="bike" size={24} />
