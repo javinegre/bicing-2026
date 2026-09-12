@@ -9,7 +9,9 @@
    * the "N min away" labels use, so it has to be resized in screen pixels on
    * every pan/zoom rather than drawn once.
    */
-  const diameter = $derived(metersToPixels(NEARBY_RADIUS_M * 2, mapState.center.lat, mapState.zoom));
+  const diameter = $derived(
+    metersToPixels(NEARBY_RADIUS_M * 2, mapState.center.lat, mapState.zoom),
+  );
 
   /**
    * With the sheet open, the hint has to centre in the band still visible

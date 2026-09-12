@@ -44,7 +44,6 @@ const TILE_SIZE_PX = 256;
  */
 export function metersToPixels(meters: number, lat: number, zoom: number): number {
   const metersPerPixel =
-    (2 * Math.PI * EARTH_RADIUS_M * Math.cos((lat * Math.PI) / 180)) /
-    (TILE_SIZE_PX * 2 ** zoom);
+    (2 * Math.PI * EARTH_RADIUS_M * Math.cos((lat * Math.PI) / 180)) / (TILE_SIZE_PX * 2 ** zoom);
   return meters / metersPerPixel;
 }
