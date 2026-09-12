@@ -35,6 +35,13 @@
   .icon :global(svg) {
     width: 100%;
     height: 100%;
+  }
+
+  /* Only solid icons (no fill attribute of their own) need this. Stroke/outline
+     icons set fill="none" on their root <svg> themselves; a CSS rule targeting
+     that same element would win over the attribute and cascade currentColor
+     into their unfilled children, turning rings into solid discs. */
+  .icon :global(svg:not([fill])) {
     fill: currentColor;
   }
 </style>
