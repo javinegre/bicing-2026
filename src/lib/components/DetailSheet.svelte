@@ -156,7 +156,10 @@
         class="action"
         disabled={!canPlan}
         aria-label="Add to plan"
-        onclick={() => planState.add(selected)}
+        onclick={() => {
+          planState.add(selected);
+          if (planState.complete) uiState.go('plan');
+        }}
       >
         <Icon name="tab-plan" size={16} />
       </button>

@@ -5,6 +5,7 @@
   import { resourceCount, stationColor } from '$lib/domain/station';
   import { planState } from '$lib/state/plan.svelte';
   import { prefsState } from '$lib/state/prefs.svelte';
+  import { uiState } from '$lib/state/ui.svelte';
   import type { Station } from '$lib/domain/types';
 
   interface Props {
@@ -62,7 +63,10 @@
     disabled={!canPlan}
     title={planHint}
     aria-label={planHint}
-    onclick={() => planState.add(station)}
+    onclick={() => {
+      planState.add(station);
+      uiState.go('plan');
+    }}
   >
     <Icon name="tab-plan" size={15} />
   </button>
