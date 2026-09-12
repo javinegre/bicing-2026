@@ -22,21 +22,20 @@ function appVersion(): string {
  * Which deploy this bundle is. Set explicitly via `APP_ENV` (e.g.
  * `APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build`) rather
  * than derived from BASE_PATH, so the two stay independent knobs — a local
- * build against a staging-like path doesn't silently flip this. `development`
- * is reserved for running against a local negre.co-server checkout on a
- * laptop; nothing sets it yet — `npm run dev` still defaults to `production`
- * until that's wired up.
+ * build against a staging-like path doesn't silently flip this. Without an
+ * explicit `APP_ENV`, `vite`'s own dev-vs-build `mode` picks `development`
+ * for `npm run dev` and `production` for `npm run build`/`preview`.
  */
-function appEnv(): 'production' | 'staging' | 'development' {
+function appEnv(mode: string): 'production' | 'staging' | 'development' {
   if (process.env.APP_ENV === 'staging') return 'staging';
   if (process.env.APP_ENV === 'development') return 'development';
-  return 'production';
+  return mode === 'development' ? 'development' : 'production';
 }
 
 export default defineConfig(({ mode }) => ({
   define: {
     __APP_VERSION__: JSON.stringify(appVersion()),
-    __APP_ENV__: JSON.stringify(appEnv()),
+    __APP_ENV__: JSON.stringify(appEnv(mode)),
   },
 
   // negre.co-server mounts each app under a path prefix (nginx serves dist/
