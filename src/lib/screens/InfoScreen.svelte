@@ -51,7 +51,7 @@
   <div class="label-caps section">Marker colour · docks use the same scale</div>
   {#each SCALE as step (step.color)}
     <div class="row">
-      <img class="marker" src={getMarkerIconUrl('bikes', 'big', step.color)} alt="" />
+      <img class="marker" src={getMarkerIconUrl('bikes', 'm', step.color)} alt="" />
       <div class="text">
         <div class="title">{step.title}</div>
         <div class="body">{step.body}</div>

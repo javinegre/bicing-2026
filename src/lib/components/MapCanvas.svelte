@@ -2,7 +2,7 @@
   import myLocationSvg from '$lib/icons/hints/my-location.svg?raw';
   import { getMarkerIconUrl } from '$lib/icons/marker-icon';
   import { loadGoogleMaps } from '$lib/map/google-maps';
-  import { MARKER_SIZE_ZOOM_THRESHOLD, mapOptions } from '$lib/map/map-options';
+  import { mapOptions, markerSizeForZoom } from '$lib/map/map-options';
   import { stationColor } from '$lib/domain/station';
   import { geoState } from '$lib/state/geo.svelte';
   import { mapState } from '$lib/state/map.svelte';
@@ -23,7 +23,7 @@
    */
   const markers = new Map<number, google.maps.Marker>();
 
-  const size = $derived(mapState.zoom >= MARKER_SIZE_ZOOM_THRESHOLD ? 'big' : 'small');
+  const size = $derived(markerSizeForZoom(mapState.zoom));
 
   $effect(() => {
     const target = container;

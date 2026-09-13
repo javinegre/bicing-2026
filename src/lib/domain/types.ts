@@ -32,6 +32,6 @@ export type BikeTypeFilter = 'mechanical' | 'electrical' | null;
 /** The five marker/dot states, worst to best. `gray` means out of service. */
 export type StateColor = 'gray' | 'black' | 'red' | 'orange' | 'green';
 
-export type MarkerSize = 'big' | 'small';
+export type MarkerSize = 'xs' | 's' | 'm' | 'l';
 
 export type BookmarkType = 'home' | 'work' | 'favorite';

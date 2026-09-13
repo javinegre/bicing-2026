@@ -89,7 +89,7 @@
     } else {
       mainMarker.setPosition(position);
     }
-    mainMarker.setIcon(getMarkerIconUrl(resource, 'big', stationColor(station, resource, filter)));
+    mainMarker.setIcon(getMarkerIconUrl(resource, 'l', stationColor(station, resource, filter)));
 
     const seen = new Set<number>();
     for (const nearby of stationsState.all) {
@@ -97,7 +97,7 @@
       if (!isNearby(nearby, station)) continue;
       seen.add(nearby.id);
 
-      const icon = getMarkerIconUrl(resource, 'small', stationColor(nearby, resource, filter));
+      const icon = getMarkerIconUrl(resource, 's', stationColor(nearby, resource, filter));
       const existing = nearbyMarkers.get(nearby.id);
       if (existing) {
         existing.setIcon(icon);

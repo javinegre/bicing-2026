@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="21.6" height="24" viewBox="0 0 18 20">
+<circle fill="{{MAIN}}" cx="9" cy="8.955" r="6.527"/>
+<circle fill="none" stroke="{{RING}}" stroke-width="2" cx="9" cy="8.955" r="7.027"/>
+<polygon fill="{{RING}}" stroke="{{LINE}}" stroke-miterlimit="10" points="11.506,16.396 9,19.045 6.494,16.396"/>
+<line fill="none" stroke="{{LINE}}" stroke-miterlimit="10" x1="3.57" y1="3.668" x2="14.321" y2="14.42"/>
+</svg>

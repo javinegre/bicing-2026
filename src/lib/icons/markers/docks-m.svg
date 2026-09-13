@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20">
+<path fill="{{MAIN}}" fill-rule="evenodd" d="M2.473,8.955a6.527,6.527 0 1,0 13.054,0a6.527,6.527 0 1,0 -13.054,0Z M6.442,8.997a2.6,2.6 0 1,0 5.2,0a2.6,2.6 0 1,0 -5.2,0Z"/>
+<circle fill="none" stroke="{{RING}}" stroke-width="2" cx="9" cy="8.955" r="7.027"/>
+<circle fill="none" stroke="{{RING}}" stroke-width="1" cx="9.042" cy="8.997" r="2.6"/>
+<polygon fill="{{RING}}" stroke="{{LINE}}" stroke-miterlimit="10" points="11.506,16.396 9,19.045 6.494,16.396"/>
+<line fill="none" stroke="{{LINE}}" stroke-miterlimit="10" x1="3.602" y1="3.365" x2="6.862" y2="6.626"/>
+<line fill="none" stroke="{{LINE}}" stroke-miterlimit="10" x1="11.544" y1="11.336" x2="14.459" y2="14.252"/>
+</svg>

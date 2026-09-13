@@ -1,4 +1,4 @@
-import type { Coordinates } from '$lib/domain/types';
+import type { Coordinates, MarkerSize } from '$lib/domain/types';
 
 /** The same default the 2023 app opens on, near Passeig de Gràcia. */
 export const DEFAULT_CENTER: Coordinates = { lat: 41.38694482, lng: 2.17017464 };
@@ -7,8 +7,17 @@ export const DEFAULT_ZOOM = 15;
 export const MIN_ZOOM = 13;
 export const MAX_ZOOM = 18;
 
-/** Below this, markers switch to the smaller template — 500 big pins is mush. */
-export const MARKER_SIZE_ZOOM_THRESHOLD = 14;
+/** Inclusive lower zoom bound per size, largest first. */
+export const MARKER_SIZE_BY_ZOOM: ReadonlyArray<readonly [minZoom: number, size: MarkerSize]> = [
+  [18, 'l'],
+  [16, 'm'],
+  [14, 's'],
+  [-Infinity, 'xs'],
+];
+
+export function markerSizeForZoom(zoom: number): MarkerSize {
+  return MARKER_SIZE_BY_ZOOM.find(([min]) => zoom >= min)![1];
+}
 
 /**
  * A muted, label-light basemap: the markers carry all the colour, so the map
