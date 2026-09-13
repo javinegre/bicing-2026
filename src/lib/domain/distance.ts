@@ -29,9 +29,20 @@ export function walkingMinutes(meters: number): number {
  */
 export const NEARBY_RADIUS_M = 340;
 
-export function isNearby(point: Coordinates, center: Coordinates): boolean {
-  return distanceMeters(point, center) <= NEARBY_RADIUS_M;
+export function isNearby(
+  point: Coordinates,
+  center: Coordinates,
+  radiusM: number = NEARBY_RADIUS_M,
+): boolean {
+  return distanceMeters(point, center) <= radiusM;
 }
+
+/**
+ * The Plan screen's leg maps use a wider 10 min catchment instead of the 5 min
+ * "nearby" cutoff above — derived straight from the walking pace rather than
+ * doubling the legacy ~340 m figure, which wasn't itself derived from it.
+ */
+export const LEG_NEARBY_RADIUS_M = WALKING_M_PER_MIN * 10;
 
 /** Google's tile size; zoom N means the world is TILE_SIZE_PX * 2^N pixels wide. */
 const TILE_SIZE_PX = 256;

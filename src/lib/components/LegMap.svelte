@@ -2,7 +2,7 @@
   import { getMarkerIconUrl } from '$lib/icons/marker-icon';
   import { loadGoogleMaps } from '$lib/map/google-maps';
   import { mapOptions } from '$lib/map/map-options';
-  import { isNearby } from '$lib/domain/distance';
+  import { isNearby, LEG_NEARBY_RADIUS_M } from '$lib/domain/distance';
   import { stationColor } from '$lib/domain/station';
   import { prefsState } from '$lib/state/prefs.svelte';
   import { stationsState } from '$lib/state/stations.svelte';
@@ -23,7 +23,7 @@
   let map: google.maps.Map | null = null;
 
   let mainMarker: google.maps.Marker | null = null;
-  /** Everything within a 5 min walk of the selected station, keyed by id so a
+  /** Everything within a 10 min walk of the selected station, keyed by id so a
    *  60 s status refresh recolours in place instead of recreating markers. */
   const nearbyMarkers = new Map<number, google.maps.Marker>();
 
@@ -76,7 +76,7 @@
   });
 
   // Reconciles the selected station's own marker plus everything within a
-  // 5 min walk of it, re-running on the station, its live counts, the shown
+  // 10 min walk of it, re-running on the station, its live counts, the shown
   // resource, and the bike-type filter — without touching the map's centre.
   $effect(() => {
     if (!ready || !map) return;
@@ -85,7 +85,11 @@
     const position = { lat: station.lat, lng: station.lng };
 
     if (!mainMarker) {
-      mainMarker = new google.maps.Marker({ map: currentMap, position });
+      mainMarker = new google.maps.Marker({
+        map: currentMap,
+        position,
+        zIndex: google.maps.Marker.MAX_ZINDEX + 1,
+      });
     } else {
       mainMarker.setPosition(position);
     }
@@ -94,7 +98,7 @@
     const seen = new Set<number>();
     for (const nearby of stationsState.all) {
       if (nearby.id === station.id) continue;
-      if (!isNearby(nearby, station)) continue;
+      if (!isNearby(nearby, station, LEG_NEARBY_RADIUS_M)) continue;
       seen.add(nearby.id);
 
       const icon = getMarkerIconUrl(resource, 's', stationColor(nearby, resource, filter));
