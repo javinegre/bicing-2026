@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte';
+  import { prefsState } from '$lib/state/prefs.svelte';
   import { sessionState } from '$lib/state/session.svelte';
   import { uiState } from '$lib/state/ui.svelte';
 
@@ -16,6 +17,9 @@
   async function logOut() {
     await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
     await sessionState.load();
+    // Otherwise prefsState keeps the account's values in memory, and the next
+    // edit would flush them into localStorage over this device's own copy.
+    await prefsState.load();
   }
 </script>
 
