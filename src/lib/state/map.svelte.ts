@@ -50,8 +50,26 @@ class MapState {
   centerOnMarker(coords: Coordinates): void {
     this.center = coords;
     this.handler?.panTo(coords);
+    this.liftForSheet();
+  }
+
+  /**
+   * Applies the same quarter-height lift as `centerOnMarker`, without first
+   * panning to a station — used by the infobar's "around here" selection,
+   * which opens the sheet over whatever the map is already centred on
+   * rather than a specific marker.
+   */
+  liftForSheet(): void {
     const liftPx = (this.handler?.getDiv().clientHeight ?? 0) / 4;
     if (liftPx) this.handler?.panBy(0, liftPx);
+  }
+
+  /** Reverses `liftForSheet` — pairs with dismissing the sheet when it was
+   *  opened on "around here" rather than a station (see `centerOnMarker`'s
+   *  doc for why a selected station instead re-centres on its coordinates). */
+  dropForSheet(): void {
+    const liftPx = (this.handler?.getDiv().clientHeight ?? 0) / 4;
+    if (liftPx) this.handler?.panBy(0, -liftPx);
   }
 
   zoomBy(delta: number): void {

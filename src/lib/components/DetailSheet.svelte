@@ -20,15 +20,18 @@
 
   /**
    * Closing hands the map back its full height, so the lift `centerOnMarker`
-   * applied to keep the pin clear of the sheet (see map.svelte.ts) is now a
-   * vertical offset with nothing to clear — undo it by re-centring on the
-   * selected station's real coordinates, putting it back in the middle of
-   * the now-full map instead of high in what was the visible band above the
-   * sheet.
+   * (or, with nothing selected, `liftForSheet`) applied to keep the view
+   * clear of the sheet is now a vertical offset with nothing to clear.
+   * With a station selected, undo it by re-centring on that station's real
+   * coordinates, putting it back in the middle of the now-full map instead
+   * of high in what was the visible band above the sheet. With nothing
+   * selected (the infobar's "around here" case) there's no coordinate to
+   * re-centre on, so reverse the same relative lift instead.
    */
   function dismiss(): void {
     uiState.closeSheet();
     if (selected) mapState.panTo(selected);
+    else mapState.dropForSheet();
   }
 
   /**

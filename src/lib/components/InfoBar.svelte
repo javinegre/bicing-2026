@@ -29,11 +29,21 @@
   role="button"
   tabindex="0"
   aria-label="Around here"
-  onclick={() => uiState.select(null)}
+  onclick={() => {
+    // liftForSheet pans by a fixed offset rather than to an absolute
+    // position (there's no station coordinate to anchor on here), so it
+    // must only run on the closed-to-open transition or repeat taps would
+    // stack the lift each time.
+    const wasOpen = uiState.sheetOpen;
+    uiState.select(null);
+    if (!wasOpen) mapState.liftForSheet();
+  }}
   onkeydown={(event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
+    const wasOpen = uiState.sheetOpen;
     uiState.select(null);
+    if (!wasOpen) mapState.liftForSheet();
   }}
 >
   <div class="total">
