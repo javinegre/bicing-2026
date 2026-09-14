@@ -76,7 +76,7 @@
   // Runs once booted, and again any time `visibleTabs` or `tab` change, so
   // it also catches signing out while sitting on Search/Saved.
   $effect(() => {
-    if (booted && !uiState.visibleTabs.includes(uiState.tab)) uiState.redirectToMap();
+    if (booted && !uiState.reachableTabs.includes(uiState.tab)) uiState.redirectToMap();
   });
 </script>
 

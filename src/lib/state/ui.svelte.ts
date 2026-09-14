@@ -36,6 +36,15 @@ class UiState {
 
   readonly visibleTabs = $derived(sessionState.signedIn ? SIGNED_IN_TABS : SIGNED_OUT_TABS);
 
+  /** `visibleTabs` plus any tab reachable only by a direct link rather than
+   *  the bar — signed in, Info has no bar slot but AccountScreen's "How to
+   *  read the map" row still routes to it via `go('info')`. Used by the
+   *  App.svelte redirect guard so that link isn't treated as invalid and
+   *  bounced back to Map the instant it's clicked. */
+  readonly reachableTabs = $derived(
+    this.visibleTabs.includes('info') ? this.visibleTabs : [...this.visibleTabs, 'info'],
+  );
+
   /** User-initiated navigation (TabBar, "See all", bookmark jumps). No-ops on
    *  the already-active tab so repeat taps don't spam history. */
   go(tab: Tab): void {
