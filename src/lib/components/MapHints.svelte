@@ -15,15 +15,19 @@
 
   /**
    * With the sheet open, the hint has to centre in the band still visible
-   * above it — centring on the full screen would put it half-hidden under
-   * the sheet. `sheetHeight` is the sheet's real rendered height (it only
-   * grows to fit its content, not to its CSS `54%` cap), so this tracks the
-   * sheet's actual top rather than assuming it is always at the cap.
+   * above it, at the same spot `mapState.liftForSheet`/`centerOnMarker`
+   * (map.svelte.ts) actually pans `mapState.center` to on screen — a fixed
+   * quarter of the map's height, not wherever the sheet's real content
+   * happens to end. Using the sheet's true rendered height here instead
+   * (it only grows to fit its content, not its CSS `54%` cap) would drift
+   * out of sync with that fixed pan and land the crosshair off the point
+   * the map is actually centred on. A CSS percentage does the quartering
+   * without needing the map div's pixel height in this component.
    */
-  const sheetInset = $derived(uiState.sheetOpen ? uiState.sheetHeight : 0);
+  const sheetInset = $derived(uiState.sheetOpen ? '50%' : '0');
 </script>
 
-<div class="hints" style:bottom="{sheetInset}px">
+<div class="hints" style:bottom={sheetInset}>
   <div class="nearby" style:width="{diameter}px" style:height="{diameter}px"></div>
   <div class="crosshair">
     <Icon name="crosshair" size={16} />
