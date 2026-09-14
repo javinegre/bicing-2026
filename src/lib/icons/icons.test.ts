@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ICON_NAMES, iconSvg } from './index';
+import { ICON_NAMES, iconSvg, stripSize } from './index';
 
 describe('icon registry', () => {
   it('resolves every declared name to a real file', () => {
@@ -12,8 +12,10 @@ describe('icon registry', () => {
   });
 
   it('keeps width/height on a nested shape, not just the root svg', () => {
-    // tab-plan's destination <rect> needs its own size — a global strip
-    // zeroes it out and the shape silently vanishes.
-    expect(iconSvg('tab-plan')).toMatch(/<rect[^>]*\swidth="4.8"[^>]*\sheight="4.8"/);
+    // A rect (or any nested shape) with its own width/height must survive —
+    // a global strip over the whole file zeroes it out and the shape
+    // silently vanishes.
+    const svg = '<svg width="24" height="24"><rect width="4.8" height="4.8"/></svg>';
+    expect(stripSize(svg)).toBe('<svg><rect width="4.8" height="4.8"/></svg>');
   });
 });

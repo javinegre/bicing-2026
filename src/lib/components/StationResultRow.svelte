@@ -68,7 +68,7 @@
       uiState.go('plan');
     }}
   >
-    <Icon name="tab-plan" size={15} />
+    <Icon name={planState.origin ? 'tab-plan-destination' : 'tab-plan-origin'} size={15} />
   </button>
 </div>
 
