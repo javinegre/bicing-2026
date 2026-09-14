@@ -10,4 +10,10 @@ describe('icon registry', () => {
   it('strips fixed dimensions so the size prop wins', () => {
     expect(iconSvg('tab-map')).not.toMatch(/\swidth="/);
   });
+
+  it('keeps width/height on a nested shape, not just the root svg', () => {
+    // tab-plan's destination <rect> needs its own size — a global strip
+    // zeroes it out and the shape silently vanishes.
+    expect(iconSvg('tab-plan')).toMatch(/<rect[^>]*\swidth="4.8"[^>]*\sheight="4.8"/);
+  });
 });

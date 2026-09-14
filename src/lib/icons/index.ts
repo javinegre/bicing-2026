@@ -51,8 +51,15 @@ export const ICON_NAMES = [
 
 export type IconName = (typeof ICON_NAMES)[number];
 
-/** Fixed width/height in the source files would fight the size prop. */
-const stripSize = (svg: string) => svg.replace(/\s(width|height)="[^"]*"/g, '');
+/**
+ * Fixed width/height on the root `<svg>` would fight the `size` prop, so
+ * strip them there — but only there. The replace must stay scoped to the
+ * opening tag: a global replace over the whole string also strips a
+ * `width`/`height` on a nested shape (e.g. tab-plan's destination `<rect>`),
+ * zeroing its size and making it vanish entirely.
+ */
+const stripSize = (svg: string) =>
+  svg.replace(/^<svg\b[^>]*>/, (openTag) => openTag.replace(/\s(width|height)="[^"]*"/g, ''));
 
 const registry = new Map<string, string>();
 for (const [path, svg] of Object.entries(modules)) {
