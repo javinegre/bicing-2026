@@ -113,31 +113,32 @@
   ></button>
 
   {#if selected}
+    {@const disabled = selected.status === 0}
     <header class="head">
       <AvailabilityRing
         station={selected}
         value={shownCount}
         label={prefsState.resourceShown === 'bikes' ? 'bikes' : 'docks'}
+        {disabled}
       />
 
-      <div class="identity">
+      <div class="identity" class:disabled>
         <h2 class="name">{selected.name}</h2>
-        <p class="meta">{walk} min away · {freshness}</p>
+        <p class="meta">
+          <span class="station-id">#{selected.id}</span> · {walk} min away · {freshness}
+        </p>
         <div class="legend">
           <span class="chip"
-            ><i style:background="var(--color-mech)"></i><b data-count>{selected.mechanical}</b><em
-              >mech</em
-            ></span
+            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-mech)'}
+            ></i><b data-count>{selected.mechanical}</b><em>mech</em></span
           >
           <span class="chip"
-            ><i style:background="var(--color-elec)"></i><b data-count>{selected.electrical}</b><em
-              >elec</em
-            ></span
+            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-elec)'}
+            ></i><b data-count>{selected.electrical}</b><em>elec</em></span
           >
           <span class="chip"
-            ><i style:background="var(--color-dock)"></i><b data-count>{selected.docks}</b><em
-              >free</em
-            ></span
+            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-dock)'}
+            ></i><b data-count>{selected.docks}</b><em>free</em></span
           >
         </div>
       </div>
@@ -260,11 +261,33 @@
     text-overflow: ellipsis;
   }
 
+  .identity.disabled .name {
+    color: var(--color-ink-secondary);
+  }
+
+  .identity.disabled .meta {
+    color: var(--color-ink-label);
+    opacity: 0.6;
+  }
+
+  .identity.disabled .legend {
+    color: var(--color-ink-label);
+  }
+
+  .identity.disabled .legend b,
+  .identity.disabled .legend em {
+    text-decoration: line-through;
+  }
+
   .meta {
     margin: 2px 0 0;
     font-size: 12px;
     line-height: 1.4;
     color: var(--color-ink-secondary);
+  }
+
+  .station-id {
+    font-family: var(--font-mono);
   }
 
   .legend {

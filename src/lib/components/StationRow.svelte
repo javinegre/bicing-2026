@@ -18,6 +18,7 @@
     stationColor(station, prefsState.resourceShown, prefsState.bikeTypeFilter),
   );
   const bikes = $derived(resourceCount(station, 'bikes', prefsState.bikeTypeFilter));
+  const disabled = $derived(station.status === 0);
 </script>
 
 <button type="button" class="row" onclick={() => onselect?.(station)}>
@@ -26,10 +27,10 @@
     <span class="distance">{distance}</span>
   {/if}
   <span class="body">
-    <span class="name">{station.name}</span>
-    <AvailabilityBar {station} />
+    <span class="name" class:disabled>{station.name}</span>
+    <AvailabilityBar {station} {disabled} />
   </span>
-  <span class="counts">
+  <span class="counts" class:disabled>
     <span data-count>{bikes}</span>
     <span class="docks" data-count>{station.docks}</span>
   </span>
@@ -92,5 +93,10 @@
 
   .docks {
     color: var(--color-ink-label);
+  }
+
+  .name.disabled,
+  .counts.disabled {
+    text-decoration: line-through;
   }
 </style>

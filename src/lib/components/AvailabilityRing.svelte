@@ -7,19 +7,24 @@
     /** The count in the middle — bikes or docks, depending on what's shown. */
     value: number;
     label: string;
+    /** Non-operative stations lose the mech/elec colour coding entirely. */
+    disabled?: boolean;
   }
 
-  const { station, value, label }: Props = $props();
+  const { station, value, label, disabled = false }: Props = $props();
   const split = $derived(availabilitySplit(station));
 
   // conic-gradient wants cumulative turns, not segment widths.
   const mechTurn = $derived(split.mechanical / 100);
   const elecTurn = $derived(mechTurn + split.electrical / 100);
+
+  const mechColor = $derived(disabled ? 'var(--color-ink-secondary)' : 'var(--color-mech)');
+  const elecColor = $derived(disabled ? 'var(--color-ink-label)' : 'var(--color-elec)');
 </script>
 
 <div
   class="ring"
-  style:background="conic-gradient(var(--color-mech) 0turn {mechTurn}turn, var(--color-elec) {mechTurn}turn
+  style:background="conic-gradient({mechColor} 0turn {mechTurn}turn, {elecColor} {mechTurn}turn
   {elecTurn}turn, rgba(255,255,255,.18) {elecTurn}turn 1turn)"
 >
   <div class="hub">
