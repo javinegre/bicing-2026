@@ -147,14 +147,20 @@
 
   .cards {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    overflow-x: auto;
     gap: 10px;
     padding: 20px 16px 0;
   }
 
   .card {
     display: block;
-    width: 100%;
+    flex: none;
+    /* Narrower than the container so the next card peeks in as a scroll hint.
+       Capped by min() too, or min-width would win over max-width past ~590px
+       of container width and blow past the 500px cap. */
+    min-width: min(85%, 500px);
+    max-width: 500px;
     text-align: left;
     padding: 14px 16px;
     box-sizing: border-box;
