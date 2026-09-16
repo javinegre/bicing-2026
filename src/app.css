@@ -69,6 +69,14 @@
     overscroll-behavior: none;
   }
 
+  /* Mirrors bicing-2023's capped app width so the layout doesn't stretch
+     edge-to-edge on wide viewports. */
+  #app {
+    max-width: 768px;
+    height: 100%;
+    margin: 0 auto;
+  }
+
   /* Counts sit in columns and change width as digits change; without this they
      jitter on every 60 s refresh. */
   [data-count] {
