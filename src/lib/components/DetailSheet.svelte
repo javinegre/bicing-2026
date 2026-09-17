@@ -129,16 +129,19 @@
         </p>
         <div class="legend">
           <span class="chip"
-            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-mech)'}
-            ></i><b data-count>{selected.mechanical}</b><em>mech</em></span
+            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-mech)'}></i><b
+              data-count>{selected.mechanical}</b
+            ><em>mech</em></span
           >
           <span class="chip"
-            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-elec)'}
-            ></i><b data-count>{selected.electrical}</b><em>elec</em></span
+            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-elec)'}></i><b
+              data-count>{selected.electrical}</b
+            ><em>elec</em></span
           >
           <span class="chip"
-            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-dock)'}
-            ></i><b data-count>{selected.docks}</b><em>free</em></span
+            ><i style:background={disabled ? 'var(--color-ink-label)' : 'var(--color-dock)'}></i><b
+              data-count>{selected.docks}</b
+            ><em>free</em></span
           >
         </div>
       </div>

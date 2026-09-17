@@ -24,7 +24,8 @@
 
 <div
   class="ring"
-  style:background="conic-gradient({mechColor} 0turn {mechTurn}turn, {elecColor} {mechTurn}turn
+  style:background="conic-gradient({mechColor} 0turn {mechTurn}turn, {elecColor}
+  {mechTurn}turn
   {elecTurn}turn, rgba(255,255,255,.18) {elecTurn}turn 1turn)"
 >
   <div class="hub">
