@@ -16,6 +16,16 @@ interface TripResponse {
   updatedAt: number;
 }
 
+interface TripListResponse {
+  success: true;
+  trips: Trip[];
+}
+
+export async function listTrips(): Promise<Trip[]> {
+  const res = await apiFetch<TripListResponse>('/config/trips');
+  return res.trips;
+}
+
 export async function createTrip(input: TripInput): Promise<Trip> {
   const res = await apiFetch<TripResponse>('/config/trips', {
     method: 'POST',

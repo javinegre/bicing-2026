@@ -6,10 +6,12 @@
   import { rankByDistance } from '$lib/domain/nearby';
   import { resourceCount, stationColor } from '$lib/domain/station';
   import { mapState } from '$lib/state/map.svelte';
+  import { planState } from '$lib/state/plan.svelte';
   import { prefsState } from '$lib/state/prefs.svelte';
   import { stationsState } from '$lib/state/stations.svelte';
+  import { tripsState } from '$lib/state/trips.svelte';
   import { uiState } from '$lib/state/ui.svelte';
-  import type { BookmarkType } from '$lib/domain/types';
+  import type { BookmarkType, Station } from '$lib/domain/types';
   import type { IconName } from '$lib/icons';
 
   const PLACES: { type: BookmarkType; icon: IconName; label: string }[] = [
@@ -43,6 +45,30 @@
       .map((id) => stationsState.byId(id))
       .filter((s): s is NonNullable<typeof s> => s !== undefined),
   );
+
+  // Re-fetched each time this screen mounts (see tripsState.load), so a trip
+  // saved from another device shows up without a manual refresh.
+  $effect(() => {
+    void tripsState.load();
+  });
+
+  const trips = $derived(
+    tripsState.trips
+      .map((trip) => {
+        const origin = stationsState.byId(trip.origin);
+        const destination = stationsState.byId(trip.destination);
+        return origin && destination
+          ? { id: trip.id, label: trip.label, origin, destination }
+          : null;
+      })
+      .filter((t): t is NonNullable<typeof t> => t !== null),
+  );
+
+  function openTrip(origin: Station, destination: Station): void {
+    planState.setOrigin(origin);
+    planState.setDestination(destination);
+    uiState.go('plan');
+  }
 </script>
 
 <div class="screen">
@@ -98,6 +124,26 @@
           </span>
         </div>
       {/if}
+    {/each}
+  </div>
+
+  <div class="trips">
+    <div class="label-caps">Saved trips</div>
+    {#each trips as trip (trip.id)}
+      <button
+        type="button"
+        class="trip-row"
+        onclick={() => openTrip(trip.origin, trip.destination)}
+      >
+        <span class="trip-icon"><Icon name="route" size={14} /></span>
+        <span class="trip-body">
+          <span class="trip-label">{trip.label}</span>
+          <span class="trip-route">{trip.origin.name} → {trip.destination.name}</span>
+        </span>
+        <Icon name="chevron-right" size={14} />
+      </button>
+    {:else}
+      <p class="none">Save a trip from Plan to keep it here.</p>
     {/each}
   </div>
 
@@ -254,6 +300,63 @@
 
   .stat .label-caps {
     margin-top: 4px;
+  }
+
+  .trips {
+    padding: 26px 16px 0;
+  }
+
+  .trip-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    padding: 11px 0;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .trip-icon {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink-secondary);
+  }
+
+  .trip-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .trip-label {
+    display: block;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .trip-route {
+    display: block;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--color-ink-label);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .stations {
