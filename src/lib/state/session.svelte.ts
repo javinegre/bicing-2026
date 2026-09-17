@@ -36,6 +36,14 @@ class SessionState {
 
   async load(): Promise<void> {
     this.status = 'loading';
+    // Local-only escape hatch to preview signed-in screens (e.g. Saved)
+    // without a real passkey session. Set in .env, which is gitignored;
+    // never true in a built app. See VITE_DEV_FAKE_SESSION in .env.sample.
+    if (import.meta.env.VITE_DEV_FAKE_SESSION === 'true') {
+      this.user = { id: 'dev-preview', email: 'dev-preview@negre.co', name: 'Dev Preview' };
+      this.status = 'ready';
+      return;
+    }
     try {
       const res = await fetch(SESSION_URL, {
         credentials: 'include',
