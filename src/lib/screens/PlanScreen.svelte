@@ -1,9 +1,13 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte';
   import LegMap from '$lib/components/LegMap.svelte';
+  import SaveTripDialog from '$lib/components/SaveTripDialog.svelte';
   import { resourceCount } from '$lib/domain/station';
   import { planState } from '$lib/state/plan.svelte';
+  import { sessionState } from '$lib/state/session.svelte';
   import { uiState } from '$lib/state/ui.svelte';
+
+  let saveDialogOpen = $state(false);
 
   /**
    * Two stacked halves: where to pick a bike up, and where to leave it.
@@ -36,9 +40,26 @@
   <header class="head">
     <h1>Plan</h1>
     {#if planState.active}
+      {#if sessionState.signedIn}
+        <button
+          type="button"
+          class="save-trip gradient-accent"
+          onclick={() => (saveDialogOpen = true)}
+        >
+          Save trip
+        </button>
+      {/if}
       <button type="button" class="cancel" onclick={() => planState.cancel()}>Cancel</button>
     {/if}
   </header>
+
+  {#if planState.origin && planState.destination}
+    <SaveTripDialog
+      bind:open={saveDialogOpen}
+      origin={planState.origin}
+      destination={planState.destination}
+    />
+  {/if}
 
   <div class="legs">
     {#each legs as leg (leg.key)}
@@ -131,6 +152,23 @@
     font-weight: 500;
     font-size: 13px;
     cursor: pointer;
+  }
+
+  .save-trip {
+    margin-left: auto;
+    height: 32px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 9999px;
+    color: var(--color-ink);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .save-trip + .cancel {
+    margin-left: 8px;
   }
 
   .legs {
