@@ -116,20 +116,20 @@
   /* A circle inscribed in the unchanged square: the FAB keeps its silhouette
      and shadow, so it still reads as the same control as the groups below. */
   .ring {
-    width: 100%;
-    height: 100%;
+    width: 32px;
+    height: 32px;
     border-radius: 9999px;
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0.6;
   }
 
   /* Carries the gradient in its own element because `gradient-accent` sets
-     background-image, which the ring's conic background would overwrite.
-     34px keeps the ring at 5px — a 4px conic edge visibly stair-steps. */
+     background-image, which the ring's conic background would overwrite. */
   .hub {
-    width: 34px;
-    height: 34px;
+    width: 26px;
+    height: 26px;
     border-radius: 9999px;
     display: flex;
     align-items: center;
