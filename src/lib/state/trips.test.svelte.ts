@@ -130,7 +130,9 @@ describe('tripsState.remove', () => {
 
     expect(ok).toBe(true);
     expect(deleteTrip).toHaveBeenCalledWith('t1');
-    expect(tripsState.trips).toEqual([{ id: 't2', origin: 3, destination: 4, label: 'Work to home' }]);
+    expect(tripsState.trips).toEqual([
+      { id: 't2', origin: 3, destination: 4, label: 'Work to home' },
+    ]);
     expect(tripsState.error).toBeNull();
   });
 

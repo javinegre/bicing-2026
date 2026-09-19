@@ -179,7 +179,11 @@
             <button type="button" class="action-button" onclick={() => openRename(trip)}>
               Rename
             </button>
-            <button type="button" class="action-button" onclick={() => void tripsState.remove(trip.id)}>
+            <button
+              type="button"
+              class="action-button"
+              onclick={() => void tripsState.remove(trip.id)}
+            >
               Remove
             </button>
           </span>

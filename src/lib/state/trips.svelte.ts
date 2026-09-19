@@ -40,7 +40,12 @@ class TripsState {
     }
   }
 
-  async rename(tripId: string, origin: number, destination: number, label: string): Promise<boolean> {
+  async rename(
+    tripId: string,
+    origin: number,
+    destination: number,
+    label: string,
+  ): Promise<boolean> {
     this.saving = true;
     this.error = null;
     try {
