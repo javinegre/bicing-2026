@@ -20,6 +20,7 @@ export const ICON_NAMES = [
   'chevron-right',
   'clock',
   'close',
+  'edit',
   'gears',
   'home',
   'info',

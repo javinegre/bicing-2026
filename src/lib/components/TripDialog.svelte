@@ -10,27 +10,32 @@
     open = $bindable(false),
     origin,
     destination,
+    trip = null,
     onsaved,
   }: {
     open: boolean;
     origin: Station;
     destination: Station;
+    /** Present to rename an existing trip; absent to create a new one. */
+    trip?: { id: string; label: string } | null;
     onsaved?: () => void;
   } = $props();
 
   let label = $state('');
 
-  /** Reset to a sensible default label each time the dialog opens, rather than
-      carrying the previous trip's edited text into the next one. */
+  /** Reset each time the dialog opens, rather than carrying the previous
+      trip's edited text into the next one. */
   $effect(() => {
-    if (open) label = `${origin.name} to ${destination.name}`;
+    if (open) label = trip ? trip.label : `${origin.name} to ${destination.name}`;
   });
 
-  async function save(): Promise<void> {
+  async function submit(): Promise<void> {
     const trimmed = label.trim();
     if (!trimmed) return;
-    const saved = await tripsState.save(origin.id, destination.id, trimmed);
-    if (saved) {
+    const ok = trip
+      ? await tripsState.rename(trip.id, origin.id, destination.id, trimmed)
+      : await tripsState.save(origin.id, destination.id, trimmed);
+    if (ok) {
       open = false;
       onsaved?.();
     }
@@ -42,7 +47,7 @@
     <Dialog.Overlay class="trip-overlay" />
     <Dialog.Content class="trip-dialog">
       <div class="trip-head">
-        <Dialog.Title class="trip-title">Save trip</Dialog.Title>
+        <Dialog.Title class="trip-title">{trip ? 'Rename trip' : 'Save trip'}</Dialog.Title>
         <Dialog.Close class="trip-close" aria-label="Close">
           <Icon name="close" size={14} />
         </Dialog.Close>
@@ -72,9 +77,9 @@
           type="button"
           class="trip-save gradient-accent"
           disabled={!label.trim() || tripsState.saving}
-          onclick={save}
+          onclick={submit}
         >
-          {tripsState.saving ? 'Saving…' : 'Save trip'}
+          {tripsState.saving ? 'Saving…' : trip ? 'Rename trip' : 'Save trip'}
         </button>
       </div>
     </Dialog.Content>

@@ -3,6 +3,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import StateDot from '$lib/components/StateDot.svelte';
   import StationRow from '$lib/components/StationRow.svelte';
+  import TripDialog from '$lib/components/TripDialog.svelte';
   import { rankByDistance } from '$lib/domain/nearby';
   import { resourceCount, stationColor } from '$lib/domain/station';
   import { mapState } from '$lib/state/map.svelte';
@@ -69,11 +70,35 @@
     planState.setDestination(destination);
     uiState.go('plan');
   }
+
+  let editing = $state(false);
+
+  function removePlace(type: BookmarkType): void {
+    prefsState.setBookmark(type, null);
+  }
+
+  function removeStation(stationId: number): void {
+    prefsState.toggleSavedStation(stationId);
+  }
+
+  let renameDialogOpen = $state(false);
+  let renameTarget = $state<(typeof trips)[number] | null>(null);
+
+  function openRename(trip: (typeof trips)[number]): void {
+    renameTarget = trip;
+    renameDialogOpen = true;
+  }
 </script>
 
 <div class="screen">
   <header class="head">
-    <h1>Saved</h1>
+    <div class="head-top">
+      <h1>Saved</h1>
+      <button type="button" class="edit-button" onclick={() => (editing = !editing)}>
+        <Icon name={editing ? 'close' : 'edit'} size={14} />
+        {editing ? 'Cancel' : 'Edit'}
+      </button>
+    </div>
     <p>Your places and the stations that serve them</p>
   </header>
 
@@ -81,38 +106,46 @@
     {#each cards as card (card.type)}
       {#if card.position && card.best}
         {@const station = card.best.station}
-        <button
-          type="button"
-          class="card"
-          onclick={() => {
-            mapState.panTo(station);
-            uiState.select(station.id);
-            uiState.go('map');
-          }}
-        >
-          <span class="card-head">
-            <span class="badge gradient-accent"><Icon name={card.icon} size={13} /></span>
-            <span class="card-title">{card.label}</span>
-          </span>
-          <span class="card-body">
-            <StateDot color={stationColor(station, 'bikes', prefsState.bikeTypeFilter)} />
-            <span class="card-station">
-              <span class="station-name">{station.name}</span>
-              <span class="station-meta">{card.best.walk} away · best nearby</span>
-              <AvailabilityBar {station} height={4} solidDocks />
+        <div class="card">
+          <button
+            type="button"
+            class="card-main"
+            disabled={editing}
+            onclick={() => {
+              mapState.panTo(station);
+              uiState.select(station.id);
+              uiState.go('map');
+            }}
+          >
+            <span class="card-head">
+              <span class="badge gradient-accent"><Icon name={card.icon} size={13} /></span>
+              <span class="card-title">{card.label}</span>
             </span>
-            <span class="stat">
-              <span class="stat-value" data-count
-                >{resourceCount(station, 'bikes', prefsState.bikeTypeFilter)}</span
-              >
-              <span class="label-caps">bikes</span>
+            <span class="card-body">
+              <StateDot color={stationColor(station, 'bikes', prefsState.bikeTypeFilter)} />
+              <span class="card-station">
+                <span class="station-name">{station.name}</span>
+                <span class="station-meta">{card.best.walk} away · best nearby</span>
+                <AvailabilityBar {station} height={4} solidDocks />
+              </span>
+              <span class="stat">
+                <span class="stat-value" data-count
+                  >{resourceCount(station, 'bikes', prefsState.bikeTypeFilter)}</span
+                >
+                <span class="label-caps">bikes</span>
+              </span>
+              <span class="stat">
+                <span class="stat-value muted" data-count>{station.docks}</span>
+                <span class="label-caps">docks</span>
+              </span>
             </span>
-            <span class="stat">
-              <span class="stat-value muted" data-count>{station.docks}</span>
-              <span class="label-caps">docks</span>
-            </span>
-          </span>
-        </button>
+          </button>
+          {#if editing}
+            <button type="button" class="action-button full" onclick={() => removePlace(card.type)}>
+              Remove
+            </button>
+          {/if}
+        </div>
       {:else}
         <div class="card placeholder">
           <span class="badge outline"><Icon name={card.icon} size={13} /></span>
@@ -130,18 +163,30 @@
   <div class="trips">
     <div class="label-caps">Saved trips</div>
     {#each trips as trip (trip.id)}
-      <button
-        type="button"
-        class="trip-row"
-        onclick={() => openTrip(trip.origin, trip.destination)}
-      >
-        <span class="trip-icon"><Icon name="route" size={14} /></span>
-        <span class="trip-body">
-          <span class="trip-label">{trip.label}</span>
+      <div class="list-row">
+        <span class="list-icon"><Icon name="route" size={14} /></span>
+        <button
+          type="button"
+          class="trip-main"
+          disabled={editing}
+          onclick={() => openTrip(trip.origin, trip.destination)}
+        >
+          <span class="row-label">{trip.label}</span>
           <span class="trip-route">{trip.origin.name} → {trip.destination.name}</span>
-        </span>
-        <Icon name="chevron-right" size={14} />
-      </button>
+        </button>
+        {#if editing}
+          <span class="row-actions">
+            <button type="button" class="action-button" onclick={() => openRename(trip)}>
+              Rename
+            </button>
+            <button type="button" class="action-button" onclick={() => void tripsState.remove(trip.id)}>
+              Remove
+            </button>
+          </span>
+        {:else}
+          <Icon name="chevron-right" size={14} />
+        {/if}
+      </div>
     {:else}
       <p class="none">Save a trip from Plan to keep it here.</p>
     {/each}
@@ -150,18 +195,37 @@
   <div class="stations">
     <div class="label-caps">Saved stations</div>
     {#each savedStations as station (station.id)}
-      <StationRow
-        {station}
-        onselect={(s) => {
-          mapState.panTo(s);
-          uiState.select(s.id);
-          uiState.go('map');
-        }}
-      />
+      {#if editing}
+        <div class="list-row">
+          <StateDot color={stationColor(station, 'bikes', prefsState.bikeTypeFilter)} />
+          <span class="row-label station-edit-name">{station.name}</span>
+          <button type="button" class="action-button" onclick={() => removeStation(station.id)}>
+            Remove
+          </button>
+        </div>
+      {:else}
+        <StationRow
+          {station}
+          onselect={(s) => {
+            mapState.panTo(s);
+            uiState.select(s.id);
+            uiState.go('map');
+          }}
+        />
+      {/if}
     {:else}
       <p class="none">Star a station from Search or the map to keep it here.</p>
     {/each}
   </div>
+
+  {#if renameTarget}
+    <TripDialog
+      bind:open={renameDialogOpen}
+      origin={renameTarget.origin}
+      destination={renameTarget.destination}
+      trip={renameTarget}
+    />
+  {/if}
 </div>
 
 <style>
@@ -176,6 +240,13 @@
     padding: 22px 16px 0;
   }
 
+  .head-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
   h1 {
     margin: 0;
     font-weight: 600;
@@ -184,11 +255,49 @@
     letter-spacing: -0.015em;
   }
 
+  .edit-button {
+    height: 30px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-radius: 9999px;
+    background: none;
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
   .head p {
     margin: 4px 0 0;
     font-size: 13px;
     line-height: 1.4;
     color: var(--color-ink-label);
+  }
+
+  /* Same bordered-pill formula as .edit-button, reused for the row-level
+     Remove/Rename actions edit mode reveals. */
+  .action-button {
+    height: 30px;
+    flex: none;
+    padding: 0 14px;
+    border-radius: 9999px;
+    background: none;
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .action-button.full {
+    width: 100%;
+    margin-top: 12px;
   }
 
   .cards {
@@ -207,14 +316,12 @@
        of container width and blow past the 500px cap. */
     min-width: min(85%, 500px);
     max-width: 500px;
-    text-align: left;
     padding: 14px 16px;
     box-sizing: border-box;
     border-radius: var(--radius-surface);
     background: var(--color-panel);
     border: 1px solid var(--color-hairline);
     color: var(--color-ink);
-    cursor: pointer;
   }
 
   .card.placeholder {
@@ -223,6 +330,22 @@
     gap: 10px;
     background: transparent;
     border-style: dashed;
+    cursor: default;
+  }
+
+  .card-main {
+    display: block;
+    width: 100%;
+    padding: 0;
+    background: none;
+    border: 0;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .card-main:disabled {
     cursor: default;
   }
 
@@ -306,21 +429,17 @@
     padding: 26px 16px 0;
   }
 
-  .trip-row {
+  .list-row {
     display: flex;
     align-items: center;
     gap: 11px;
     width: 100%;
     padding: 11px 0;
-    background: none;
-    border: 0;
     border-bottom: 1px solid var(--color-hairline);
     color: var(--color-ink);
-    text-align: left;
-    cursor: pointer;
   }
 
-  .trip-icon {
+  .list-icon {
     width: 26px;
     height: 26px;
     flex: none;
@@ -333,12 +452,35 @@
     color: var(--color-ink-secondary);
   }
 
-  .trip-body {
+  .trip-main {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    padding: 0;
+    background: none;
+    border: 0;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .trip-main:disabled {
+    cursor: default;
+  }
+
+  .row-actions {
+    display: flex;
+    flex: none;
+    gap: 8px;
+  }
+
+  .station-edit-name {
     flex: 1;
     min-width: 0;
   }
 
-  .trip-label {
+  .row-label {
     display: block;
     font-weight: 500;
     font-size: 15px;

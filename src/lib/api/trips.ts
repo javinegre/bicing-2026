@@ -34,3 +34,18 @@ export async function createTrip(input: TripInput): Promise<Trip> {
   });
   return res.trip;
 }
+
+export async function updateTrip(tripId: string, input: TripInput): Promise<Trip> {
+  const res = await apiFetch<TripResponse>(`/config/trips/${encodeURIComponent(tripId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  return res.trip;
+}
+
+export async function deleteTrip(tripId: string): Promise<void> {
+  await apiFetch<{ success: true }>(`/config/trips/${encodeURIComponent(tripId)}`, {
+    method: 'DELETE',
+  });
+}

@@ -1,4 +1,4 @@
-import { createTrip, listTrips, type Trip } from '$lib/api/trips';
+import { createTrip, deleteTrip, listTrips, updateTrip, type Trip } from '$lib/api/trips';
 
 /**
  * Saving a trip needs an account — there is no localStorage fallback like
@@ -37,6 +37,33 @@ class TripsState {
       this.trips = [];
     } finally {
       this.loaded = true;
+    }
+  }
+
+  async rename(tripId: string, origin: number, destination: number, label: string): Promise<boolean> {
+    this.saving = true;
+    this.error = null;
+    try {
+      const trip = await updateTrip(tripId, { origin, destination, label });
+      this.trips = this.trips.map((t) => (t.id === tripId ? trip : t));
+      return true;
+    } catch {
+      this.error = 'Could not rename this trip.';
+      return false;
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  async remove(tripId: string): Promise<boolean> {
+    this.error = null;
+    try {
+      await deleteTrip(tripId);
+      this.trips = this.trips.filter((trip) => trip.id !== tripId);
+      return true;
+    } catch {
+      this.error = 'Could not remove this trip.';
+      return false;
     }
   }
 }

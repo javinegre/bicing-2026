@@ -1,7 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte';
   import LegMap from '$lib/components/LegMap.svelte';
-  import SaveTripDialog from '$lib/components/SaveTripDialog.svelte';
+  import TripDialog from '$lib/components/TripDialog.svelte';
   import { resourceCount } from '$lib/domain/station';
   import { planState } from '$lib/state/plan.svelte';
   import { sessionState } from '$lib/state/session.svelte';
@@ -54,7 +54,7 @@
   </header>
 
   {#if planState.origin && planState.destination}
-    <SaveTripDialog
+    <TripDialog
       bind:open={saveDialogOpen}
       origin={planState.origin}
       destination={planState.destination}
