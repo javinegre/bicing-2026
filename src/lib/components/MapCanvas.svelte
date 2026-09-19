@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import myLocationSvg from '$lib/icons/hints/my-location.svg?raw';
   import { getMarkerIconUrl } from '$lib/icons/marker-icon';
   import { loadGoogleMaps } from '$lib/map/google-maps';
-  import { mapOptions, markerSizeForZoom } from '$lib/map/map-options';
+  import { DEFAULT_ZOOM, mapOptions, markerSizeForZoom } from '$lib/map/map-options';
   import { stationColor } from '$lib/domain/station';
   import { geoState } from '$lib/state/geo.svelte';
   import { mapState } from '$lib/state/map.svelte';
@@ -23,6 +24,12 @@
    */
   const markers = new Map<number, google.maps.Marker>();
 
+  let userMarker: google.maps.Marker | null = null;
+  /** The zoom bump belongs to the session opening, not to every fix in it. */
+  let zoomedThisSession = false;
+
+  const breakFollow = () => geoState.stopFollowing();
+
   const size = $derived(markerSizeForZoom(mapState.zoom));
 
   $effect(() => {
@@ -30,6 +37,19 @@
     if (!target) return;
 
     let disposed = false;
+
+    /**
+     * Any touch of the map ends the follow lock. Listening on the container in
+     * the capture phase rather than on Google's `dragstart` catches the gestures
+     * that never drag — wheel and double-tap zoom, a pinch that only scales, a
+     * marker tap whose `centerOnMarker` would otherwise fight the next follow
+     * pan — and, unlike a Maps event, cannot be swallowed before we see it.
+     * Programmatic `panTo`/`panBy`/`setZoom` raise neither, so our own pans are
+     * safe, and MapControls is a sibling of this component, so the FAB is not
+     * inside `target`.
+     */
+    target.addEventListener('pointerdown', breakFollow, { capture: true });
+    target.addEventListener('wheel', breakFollow, { capture: true, passive: true });
 
     loadGoogleMaps()
       .then((maps) => {
@@ -58,8 +78,12 @@
 
     return () => {
       disposed = true;
+      target.removeEventListener('pointerdown', breakFollow, { capture: true });
+      target.removeEventListener('wheel', breakFollow, { capture: true });
       for (const marker of markers.values()) marker.setMap(null);
       markers.clear();
+      userMarker?.setMap(null);
+      userMarker = null;
       mapState.handler = null;
       mapState.ready = false;
     };
@@ -111,25 +135,70 @@
   });
 
   /**
-   * The device's own fix, separate from the ~500 station markers above: it
-   * changes only after a fresh `locate()` call, not on every 60 s refresh, so
-   * a plain create/destroy per change is simpler than reconciling by id.
+   * The device's own fix, separate from the ~500 station markers above. It
+   * exists only for the length of a tracking session and moves every 30 s
+   * within one, so the instance is kept and repositioned rather than rebuilt.
    */
   $effect(() => {
     if (!mapState.ready) return;
     const map = mapState.handler;
-    const position = geoState.position;
-    if (!map || !position) return;
+    const position = geoState.tracking ? geoState.position : null;
 
-    const marker = new google.maps.Marker({
+    if (!map || !position) {
+      userMarker?.setMap(null);
+      userMarker = null;
+      return;
+    }
+
+    if (userMarker) {
+      userMarker.setPosition(position);
+      return;
+    }
+
+    userMarker = new google.maps.Marker({
       map,
       position,
       icon: { url: USER_LOCATION_ICON, anchor: new google.maps.Point(12, 12) },
       clickable: false,
       zIndex: google.maps.Marker.MAX_ZINDEX + 1,
     });
+  });
 
-    return () => marker.setMap(null);
+  /**
+   * Keeps the followed view off the config: those pans are ours, not the user's.
+   */
+  $effect(() => {
+    mapState.persistView = !geoState.following;
+  });
+
+  /**
+   * Follows the fix until the user touches the map. Everything past the reads
+   * is untracked because `syncFromMap` hands `mapState.center` a fresh object
+   * on every idle — an effect that both read it and panned would re-trigger
+   * itself forever.
+   */
+  $effect(() => {
+    if (!geoState.tracking) {
+      zoomedThisSession = false;
+      return;
+    }
+
+    const position = geoState.position;
+    if (!mapState.ready || !geoState.following || !position) return;
+
+    untrack(() => {
+      // Only the opening fix may zoom; repeating it would undo a manual
+      // zoom-out every 30 s.
+      if (zoomedThisSession) {
+        mapState.panTo(position);
+      } else {
+        mapState.panTo(position, Math.max(mapState.zoom, DEFAULT_ZOOM));
+        zoomedThisSession = true;
+      }
+      // panTo is an absolute re-centre, which undoes any lift an open detail
+      // sheet had already applied (same reasoning as centerOnMarker).
+      if (uiState.sheetOpen) mapState.liftForSheet();
+    });
   });
 </script>
 

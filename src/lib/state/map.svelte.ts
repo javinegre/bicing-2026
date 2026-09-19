@@ -16,6 +16,13 @@ class MapState {
   /** Set by MapCanvas once Google hands us an instance; null everywhere else. */
   handler: google.maps.Map | null = null;
 
+  /**
+   * Cleared while the map is following a tracking session. Those pans are ours,
+   * not the user's, and persisting them would spend a config write every 30 s
+   * and leave "the view you left" pointing at wherever you happened to ride.
+   */
+  persistView = true;
+
   /** Restore the last view the user left, from whichever backend prefs loaded. */
   restore(): void {
     if (prefsState.mapCenter) this.center = prefsState.mapCenter;
@@ -26,7 +33,7 @@ class MapState {
   syncFromMap(center: Coordinates, zoom: number): void {
     this.center = center;
     this.zoom = zoom;
-    prefsState.setMapView(center, zoom);
+    if (this.persistView) prefsState.setMapView(center, zoom);
   }
 
   /** Called from the UI — moves the map, which then echoes back via syncFromMap. */

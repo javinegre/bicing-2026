@@ -1,7 +1,6 @@
 <script lang="ts">
   import Icon from './Icon.svelte';
   import ResourceSwitch from './ResourceSwitch.svelte';
-  import { DEFAULT_ZOOM } from '$lib/map/map-options';
   import { geoState } from '$lib/state/geo.svelte';
   import { mapState } from '$lib/state/map.svelte';
   import { prefsState } from '$lib/state/prefs.svelte';
@@ -13,11 +12,6 @@
     { type: 'work', icon: 'briefcase', label: 'Work' },
     { type: 'favorite', icon: 'star', label: 'Favorite' },
   ];
-
-  async function locate() {
-    const position = await geoState.locate();
-    if (position) mapState.panTo(position, Math.max(mapState.zoom, DEFAULT_ZOOM));
-  }
 
   /**
    * One control, two jobs: jump to a bookmark that exists, or set one from the
@@ -36,8 +30,27 @@
 </div>
 
 <div class="stack side">
-  <button type="button" class="fab gradient-accent" onclick={locate} aria-label="My location">
-    <Icon name="user-location" size={21} />
+  <button
+    type="button"
+    class="fab gradient-accent"
+    onclick={() => geoState.toggle()}
+    aria-pressed={geoState.tracking}
+    aria-label={geoState.tracking ? 'Stop tracking my location' : 'My location'}
+  >
+    {#if geoState.tracking}
+      <!-- `remaining` is already a turn, and it drains rather than fills. -->
+      <div
+        class="ring"
+        style:background="conic-gradient(var(--color-ink) 0turn {geoState.remaining}turn,
+        var(--color-accent-deep) {geoState.remaining}turn 1turn)"
+      >
+        <div class="hub gradient-accent">
+          <span class="pulse"><Icon name="user-location" size={21} /></span>
+        </div>
+      </div>
+    {:else}
+      <Icon name="user-location" size={21} />
+    {/if}
   </button>
 
   <div class="group control-glass">
@@ -98,6 +111,50 @@
     box-shadow: var(--shadow-control);
     color: var(--color-ink);
     cursor: pointer;
+  }
+
+  /* A circle inscribed in the unchanged square: the FAB keeps its silhouette
+     and shadow, so it still reads as the same control as the groups below. */
+  .ring {
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Carries the gradient in its own element because `gradient-accent` sets
+     background-image, which the ring's conic background would overwrite.
+     34px keeps the ring at 5px — a 4px conic edge visibly stair-steps. */
+  .hub {
+    width: 34px;
+    height: 34px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* On the icon rather than the button, which would fade the ring with it. */
+  .pulse {
+    display: flex;
+    animation: pulse 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse {
+    from {
+      opacity: 0.8;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse {
+      animation: none;
+    }
   }
 
   .group {

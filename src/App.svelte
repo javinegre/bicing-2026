@@ -27,7 +27,6 @@
     let cancelled = false;
 
     void (async () => {
-      geoState.restore();
       await sessionState.load();
       if (cancelled) return;
       await prefsState.load();
@@ -39,6 +38,7 @@
     return () => {
       cancelled = true;
       stationsState.stop();
+      geoState.stop();
       // A pending debounced write would otherwise be lost on unload.
       void prefsState.flush();
     };
