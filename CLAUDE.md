@@ -158,19 +158,27 @@ The geolocation fix is **never persisted** — not to the account, and not to
 it must not go into the synced config; and since it only exists to be drawn, it
 does not outlive the session that produced it.
 
-That session is what the "My location" FAB toggles (`geo.svelte.ts`): 30 minutes
-long, one `getCurrentPosition` every 30 s, ended early by a second tap, by
-leaving the Map screen, or by a refused permission. `maximumAge` must stay `0` —
-anything else lets the UA answer every poll from one cached fix and the marker
-never moves. A single interval drives both the refresh and the draining ring,
-and it derives elapsed time from `Date.now()` rather than counting ticks because
-background tabs throttle intervals to about one a minute.
+That session is what the "My location" FAB drives (`geo.svelte.ts`): 30 minutes
+long, one `getCurrentPosition` every 30 s, ended by leaving the Map screen or by
+a refused permission. `maximumAge` must stay `0` — anything else lets the UA
+answer every poll from one cached fix and the marker never moves. A single
+interval drives both the refresh and the draining ring, and it derives elapsed
+time from `Date.now()` rather than counting ticks because background tabs
+throttle intervals to about one a minute.
 
 The map follows each fix until the user touches it. `MapCanvas.svelte` breaks
 that lock on capture-phase `pointerdown`/`wheel` over the map container rather
 than on Google's `dragstart`, which misses wheel and double-tap zoom and pinches
 that only scale. While following, `mapState.persistView` is false so those pans
 are not written back as "the view you left".
+
+The FAB is therefore a **three-state** control, not a toggle: idle starts a
+session, following stops it, and panned-away resumes following rather than
+ending the session — so one button both recentres and stops. The icon pulses
+only while the map is actually following, which is what makes the middle state
+legible. Ring, hub and icon are siblings inside the button on purpose: opacity
+composites a subtree, so nesting the icon under the dimmed ring would cap how
+bright it could pulse.
 
 Sign-in and sign-out live in negre.co's shared auth app at `/login` — there is no
 passkey or password UI in this bundle.

@@ -108,6 +108,31 @@ describe('geoState tracking session', () => {
     geoState.toggle();
     expect(geoState.tracking).toBe(false);
   });
+
+  it('resumes following instead of stopping when the lock was broken', () => {
+    answersWith([41.4, 2.1], [41.5, 2.2]);
+    geoState.start();
+    geoState.stopFollowing();
+
+    geoState.toggle();
+
+    expect(geoState.following).toBe(true);
+    expect(geoState.tracking).toBe(true);
+
+    // The interval is untouched, so fixes keep arriving.
+    vi.advanceTimersByTime(30_000);
+    expect(geoState.position).toEqual({ lat: 41.5, lng: 2.2 });
+  });
+
+  it('stops on the next toggle once following has been resumed', () => {
+    geoState.start();
+    geoState.stopFollowing();
+    geoState.toggle();
+    geoState.toggle();
+
+    expect(geoState.tracking).toBe(false);
+    expect(geoState.following).toBe(false);
+  });
 });
 
 describe('geoState.stopFollowing', () => {

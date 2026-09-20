@@ -66,9 +66,15 @@ class GeoState {
     if (this.status === 'locating') this.status = 'idle';
   }
 
+  /**
+   * Three outcomes, not two: a session whose follow lock the user broke by
+   * panning is resumed rather than ended, so the one control both recentres
+   * and stops without needing a second button.
+   */
   toggle(): void {
-    if (this.tracking) this.stop();
-    else this.start();
+    if (!this.tracking) this.start();
+    else if (this.following) this.stop();
+    else this.following = true;
   }
 
   stopFollowing(): void {

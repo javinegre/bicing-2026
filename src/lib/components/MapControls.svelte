@@ -13,6 +13,16 @@
     { type: 'favorite', icon: 'star', label: 'Favorite' },
   ];
 
+  // The label carries what a press will do; `aria-pressed` only states whether
+  // tracking is on, which stays true across a recentre.
+  const locationLabel = $derived(
+    !geoState.tracking
+      ? 'My location'
+      : geoState.following
+        ? 'Stop tracking my location'
+        : 'Recentre on my location',
+  );
+
   /**
    * One control, two jobs: jump to a bookmark that exists, or set one from the
    * current centre if it doesn't. Long-press would be invisible; a tap on an
@@ -35,7 +45,7 @@
     class="fab gradient-accent"
     onclick={() => geoState.toggle()}
     aria-pressed={geoState.tracking}
-    aria-label={geoState.tracking ? 'Stop tracking my location' : 'My location'}
+    aria-label={locationLabel}
   >
     {#if geoState.tracking}
       <!-- `remaining` is already a turn, and it drains rather than fills. -->
@@ -43,14 +53,12 @@
         class="ring"
         style:background="conic-gradient(var(--color-ink) 0turn {geoState.remaining}turn,
         var(--color-accent-deep) {geoState.remaining}turn 1turn)"
-      >
-        <div class="hub gradient-accent">
-          <span class="pulse"><Icon name="user-location" size={21} /></span>
-        </div>
-      </div>
-    {:else}
-      <Icon name="user-location" size={21} />
+      ></div>
+      <div class="hub gradient-accent"></div>
     {/if}
+    <span class="glyph" class:pulsing={geoState.following}>
+      <Icon name="user-location" size={21} />
+    </span>
   </button>
 
   <div class="group control-glass">
@@ -101,6 +109,7 @@
   }
 
   .fab {
+    position: relative;
     width: 44px;
     height: 44px;
     display: flex;
@@ -113,38 +122,50 @@
     cursor: pointer;
   }
 
+  /* Ring, hub and glyph are siblings rather than nested: opacity composites a
+     whole subtree, so a dimmed ring wrapping the icon would cap how bright the
+     icon could ever pulse. Absolute, because the FAB's flex centring does not
+     reach positioned children. */
+  .ring,
+  .hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 9999px;
+  }
+
   /* A circle inscribed in the unchanged square: the FAB keeps its silhouette
      and shadow, so it still reads as the same control as the groups below. */
   .ring {
     width: 32px;
     height: 32px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     opacity: 0.6;
   }
 
-  /* Carries the gradient in its own element because `gradient-accent` sets
-     background-image, which the ring's conic background would overwrite. */
+  /* Masks the conic's centre. Carries the gradient in its own element because
+     `gradient-accent` sets background-image, which the ring's conic background
+     would overwrite. */
   .hub {
     width: 26px;
     height: 26px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
-  /* On the icon rather than the button, which would fade the ring with it. */
-  .pulse {
+  /* Positioned so it paints above the two absolute siblings before it. */
+  .glyph {
+    position: relative;
     display: flex;
+  }
+
+  /* Pulsing means the map is following you, so it stops when a pan breaks the
+     lock even though the session keeps running. */
+  .pulsing {
     animation: pulse 2s ease-in-out infinite alternate;
   }
 
   @keyframes pulse {
     from {
-      opacity: 0.8;
+      opacity: 0.5;
     }
     to {
       opacity: 1;
@@ -152,7 +173,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pulse {
+    .pulsing {
       animation: none;
     }
   }
