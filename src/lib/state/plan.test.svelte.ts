@@ -22,9 +22,18 @@ describe('planState', () => {
     planState.setDestination(null);
   });
 
-  it('starts inactive with an even split', () => {
+  it('starts idle with the origin leg leading', () => {
     expect(planState.active).toBe(false);
-    expect(planState.topGrow).toBe(50);
+    expect(planState.stage).toBe('idle');
+    expect(planState.leading).toBe('origin');
+    expect(planState.topGrow).toBe(65);
+  });
+
+  it('hands the lead to the leg still being picked', () => {
+    planState.add(rossello);
+    expect(planState.stage).toBe('planning');
+    expect(planState.leading).toBe('destination');
+    expect(planState.topGrow).toBe(35);
   });
 
   // `$state` wraps objects in a proxy, so a stored station is never identical
@@ -37,6 +46,7 @@ describe('planState', () => {
     planState.add(llull);
     expect(planState.destination).toEqual(llull);
     expect(planState.complete).toBe(true);
+    expect(planState.stage).toBe('planned');
     expect(planState.mode).toBe('origin');
     expect(planState.topGrow).toBe(65);
   });
@@ -62,13 +72,14 @@ describe('planState', () => {
     expect(planState.topGrow).toBe(35);
   });
 
-  it('cancel clears both legs and drops back to the even split', () => {
+  it('cancel clears both legs and reopens on the origin', () => {
     planState.add(rossello);
     planState.add(llull);
     planState.cancel();
     expect(planState.origin).toBeNull();
     expect(planState.destination).toBeNull();
-    expect(planState.topGrow).toBe(50);
+    expect(planState.stage).toBe('idle');
+    expect(planState.topGrow).toBe(65);
   });
 
   it('ignores focus while the plan is incomplete', () => {

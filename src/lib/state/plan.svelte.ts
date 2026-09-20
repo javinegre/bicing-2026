@@ -1,14 +1,19 @@
 import type { Station } from '$lib/domain/types';
 
-/**
- * Which half of the Plan screen is leading. `inactive` is not a third focus —
- * it means the plan is incomplete, and the split stays 50/50 with no swap
- * button and no Cancel.
- */
-export type PlanMode = 'inactive' | 'origin' | 'destination';
+export type PlanLeg = 'origin' | 'destination';
 
-/** Percentage of the split given to the top half in each mode. */
-const TOP_GROW: Record<PlanMode, number> = { inactive: 50, origin: 65, destination: 35 };
+/**
+ * Which half of the Plan screen the person last focused. `inactive` is not a
+ * third focus — it means the plan is incomplete, so there is no swap button
+ * and no Cancel, and `leading` decides the split instead.
+ */
+export type PlanMode = 'inactive' | PlanLeg;
+
+/** How far the plan has got, independent of which leg leads. */
+export type PlanStage = 'idle' | 'planning' | 'planned';
+
+/** Percentage of the split given to the top half for each leading leg. */
+const TOP_GROW: Record<PlanLeg, number> = { origin: 65, destination: 35 };
 
 class PlanState {
   origin = $state<Station | null>(null);
@@ -17,7 +22,31 @@ class PlanState {
 
   readonly complete = $derived(this.origin !== null && this.destination !== null);
   readonly active = $derived(this.mode !== 'inactive');
-  readonly topGrow = $derived(TOP_GROW[this.mode]);
+
+  readonly stage = $derived<PlanStage>(
+    this.complete
+      ? 'planned'
+      : this.origin === null && this.destination === null
+        ? 'idle'
+        : 'planning',
+  );
+
+  /**
+   * Which leg gets the larger half. Until the plan is full that is whichever
+   * leg is still being chosen — the map you are picking from deserves the
+   * space. Once both are set it follows the focus the person picked.
+   */
+  readonly leading = $derived<PlanLeg>(
+    this.complete
+      ? this.mode === 'destination'
+        ? 'destination'
+        : 'origin'
+      : this.origin === null
+        ? 'origin'
+        : 'destination',
+  );
+
+  readonly topGrow = $derived(TOP_GROW[this.leading]);
 
   /** A half-built plan has no leading side to show. */
   #settle(): void {
@@ -61,7 +90,7 @@ class PlanState {
     this.mode = this.mode === 'destination' ? 'origin' : 'destination';
   }
 
-  focus(mode: Exclude<PlanMode, 'inactive'>): void {
+  focus(mode: PlanLeg): void {
     if (this.complete) this.mode = mode;
   }
 }
