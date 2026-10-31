@@ -32,42 +32,52 @@ function appEnv(mode: string): 'production' | 'staging' | 'development' {
   return mode === 'development' ? 'development' : 'production';
 }
 
-export default defineConfig(({ mode }) => ({
-  define: {
-    __APP_VERSION__: JSON.stringify(appVersion()),
-    __APP_ENV__: JSON.stringify(appEnv(mode)),
-  },
+export default defineConfig(({ mode }) => {
+  const env = appEnv(mode);
 
-  // negre.co-server mounts each app under a path prefix (nginx serves dist/
-  // directly), so built asset URLs have to carry it. Override with
-  // BASE_PATH=/bicing-2026/ while this runs alongside the 2023 app.
-  base: mode === 'production' ? (process.env.BASE_PATH ?? '/bicing/') : '/',
-
-  plugins: [
-    svelte(),
-    tailwindcss(),
-    // Must stay a top-level plugin. Nested under `test.plugins` it silently
-    // fails to flip Vite's resolve conditions to Svelte's browser build, and
-    // every render() dies with `lifecycle_function_unavailable: mount(...) is
-    // not available on the server`.
-    ...(mode === 'test' ? [svelteTesting()] : []),
-  ],
-
-  resolve: {
-    // Vite 8 reads tsconfig `paths` natively (`tsconfigPaths`) — but only for
-    // importers it recognises as TS/JS, so every `$lib/...` import inside a
-    // .svelte file fails to resolve. An explicit alias covers both; this is
-    // still not vite-tsconfig-paths, just one line of config.
-    tsconfigPaths: true,
-    alias: {
-      $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
+  return {
+    define: {
+      __APP_VERSION__: JSON.stringify(appVersion()),
+      __APP_ENV__: JSON.stringify(env),
     },
-  },
 
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./vitest-setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,svelte.ts}'],
-  },
-}));
+    // The staging deploy ships its own icon set (same art, STG ribbon) so a
+    // home-screen shortcut or a pinned tab is distinguishable from the real
+    // app. Swapping the whole public dir rather than copying a few files over
+    // keeps `public/` the single source of truth for what prod serves.
+    publicDir: env === 'staging' ? 'public-staging' : 'public',
+
+    // negre.co-server mounts each app under a path prefix (nginx serves dist/
+    // directly), so built asset URLs have to carry it. Override with
+    // BASE_PATH=/bicing-2026/ while this runs alongside the 2023 app.
+    base: mode === 'production' ? (process.env.BASE_PATH ?? '/bicing/') : '/',
+
+    plugins: [
+      svelte(),
+      tailwindcss(),
+      // Must stay a top-level plugin. Nested under `test.plugins` it silently
+      // fails to flip Vite's resolve conditions to Svelte's browser build, and
+      // every render() dies with `lifecycle_function_unavailable: mount(...) is
+      // not available on the server`.
+      ...(mode === 'test' ? [svelteTesting()] : []),
+    ],
+
+    resolve: {
+      // Vite 8 reads tsconfig `paths` natively (`tsconfigPaths`) — but only for
+      // importers it recognises as TS/JS, so every `$lib/...` import inside a
+      // .svelte file fails to resolve. An explicit alias covers both; this is
+      // still not vite-tsconfig-paths, just one line of config.
+      tsconfigPaths: true,
+      alias: {
+        $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
+      },
+    },
+
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['./vitest-setup.ts'],
+      include: ['src/**/*.{test,spec}.{ts,svelte.ts}'],
+    },
+  };
+});

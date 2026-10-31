@@ -47,8 +47,12 @@ in place with `APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build`.
 `APP_ENV` (default `production`, also accepts `development` — reserved for a
 future local-laptop setup, not wired to anything yet) is a separate knob from
 `BASE_PATH` — it stamps `__APP_ENV__` (`vite.config.ts`), which drives the
-env badge (`EnvBadge.svelte`, mounted from `App.svelte`) and the build-version
-suffix on the Account screen. It is on negre.co rather than a `stg.` subdomain
+env badge (`EnvBadge.svelte`, mounted from `App.svelte`), the build-version
+suffix on the Account screen, the staging-only 21st.dev toolbar (dynamically
+imported in `App.svelte`, which is why staging builds emit a ~1.2 MB extra
+chunk prod does not), and the favicon/manifest set — `publicDir` points at
+`public-staging/` instead of `public/` on a staging build, so staging gets the
+STG-ribbon icons and a `Bicing STG` manifest name. It is on negre.co rather than a `stg.` subdomain
 on purpose: `session.svelte.ts` and `AccountScreen.svelte` resolve
 `/api/auth/get-session`, `/api/auth/sign-out` and `/login` as origin-relative
 literals that no env var overrides, and off that origin the session fetch
@@ -61,6 +65,8 @@ there changes it for real.
 ## Where things live
 
 ```
+public/                  favicons, apple-touch icon, webmanifest (production)
+public-staging/          same set, STG-ribboned — used when APP_ENV=staging
 src/app.css              design tokens in @theme — the only place colours are defined
 src/App.svelte           shell: boot order, tab switch
 src/lib/api/             fetch layer (stations, user config)

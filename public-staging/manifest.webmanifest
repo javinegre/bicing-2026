@@ -1,0 +1,24 @@
+{
+  "name": "Bicing STG",
+  "short_name": "Bicing STG",
+  "icons": [
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#100d0d",
+  "background_color": "#100d0d",
+  "display": "standalone"
+}
