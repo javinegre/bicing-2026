@@ -5,6 +5,7 @@
   import { mapOptions } from '$lib/map/map-options';
   import { isNearby, LEG_NEARBY_RADIUS_M } from '$lib/domain/distance';
   import { stationColor } from '$lib/domain/station';
+  import { geoState } from '$lib/state/geo.svelte';
   import { mapState } from '$lib/state/map.svelte';
   import { prefsState } from '$lib/state/prefs.svelte';
   import { stationsState } from '$lib/state/stations.svelte';
@@ -26,6 +27,9 @@
   /** Fixed, not the app's default zoom: a leg preview, not a navigable map. */
   const ZOOM = 15;
 
+  /** The blue of my-location.svg; `--color-geo` is too dim to read at this size. */
+  const USER_DOT_COLOR = '#608fd4';
+
   /**
    * Where an unchosen leg opens: the view the Map screen was left on, copied
    * once at mount rather than read reactively. `mapState.center` is rewritten
@@ -42,6 +46,8 @@
   /** Keyed by id so a 60 s status refresh recolours in place instead of
    *  recreating markers. Holds the chosen station's own large marker too. */
   const markers = new Map<number, google.maps.Marker>();
+
+  let userDot: google.maps.Marker | null = null;
 
   /** What the shown catchment is measured from: the chosen station, or the
    *  opening view while this leg is still empty. */
@@ -110,6 +116,8 @@
       ready = false;
       for (const marker of markers.values()) marker.setMap(null);
       markers.clear();
+      userDot?.setMap(null);
+      userDot = null;
       map = null;
     };
   });
@@ -167,6 +175,35 @@
       marker.setMap(null);
       markers.delete(id);
     }
+  });
+
+  // Never pans: on these maps the location is context for picking, and the
+  // follow behaviour belongs to the Map screen. A scale of 2 is a 4 px circle —
+  // a Symbol's scale is its radius. It sits above even the chosen marker, which
+  // would otherwise hide a dot this small.
+  $effect(() => {
+    if (!ready || !map) return;
+    const position = geoState.position;
+    if (!position) return;
+
+    if (userDot) {
+      userDot.setPosition(position);
+      return;
+    }
+
+    userDot = new google.maps.Marker({
+      map,
+      position,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 2,
+        fillColor: USER_DOT_COLOR,
+        fillOpacity: 1,
+        strokeWeight: 0,
+      },
+      clickable: false,
+      zIndex: google.maps.Marker.MAX_ZINDEX + 2,
+    });
   });
 </script>
 

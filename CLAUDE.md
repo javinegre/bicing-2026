@@ -162,7 +162,7 @@ is empty. Never gate a screen behind a session; an account buys sync, not access
 The geolocation fix is **never persisted** — not to the account, and not to
 `localStorage` either. It describes this device right now, not a preference, so
 it must not go into the synced config; and since it only exists to be drawn, it
-does not outlive the session that produced it.
+does not outlive the page.
 
 That session is what the "My location" FAB drives (`geo.svelte.ts`): 30 minutes
 long, one `getCurrentPosition` every 30 s, ended by leaving the Map screen or by
@@ -171,6 +171,11 @@ answer every poll from one cached fix and the marker never moves. A single
 interval drives both the refresh and the draining ring, and it derives elapsed
 time from `Date.now()` rather than counting ticks because background tabs
 throttle intervals to about one a minute.
+
+The Plan screen's leg maps draw a 4 px dot instead, from `geoState.watch()`: the
+same 30 s poll with no ring, follow lock or expiry, bounded by that screen being
+mounted. Opening Plan is therefore a second place that can raise the browser's
+location prompt.
 
 The map follows each fix until the user touches it. `MapCanvas.svelte` breaks
 that lock on capture-phase `pointerdown`/`wheel` over the map container rather

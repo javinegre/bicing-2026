@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
   import LegMap from '$lib/components/LegMap.svelte';
   import TripDialog from '$lib/components/TripDialog.svelte';
   import { resourceCount } from '$lib/domain/station';
+  import { geoState } from '$lib/state/geo.svelte';
   import { mapState } from '$lib/state/map.svelte';
   import { planState, type PlanLeg } from '$lib/state/plan.svelte';
   import { sessionState } from '$lib/state/session.svelte';
@@ -10,6 +12,10 @@
   import type { Station } from '$lib/domain/types';
 
   let saveDialogOpen = $state(false);
+
+  // The Map screen's tracking session ends on the way here, so the legs' dots
+  // need their own source of fixes. It lasts exactly as long as this screen.
+  onMount(() => geoState.watch());
 
   /**
    * Two stacked halves: where to pick a bike up, and where to leave it.

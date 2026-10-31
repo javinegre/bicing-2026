@@ -23,7 +23,7 @@ const TRACKING_OPTIONS: PositionOptions = {
  * Where the device is. Deliberately *not* part of the synced user config: a
  * location is a fact about this phone right now, and pushing it to the account
  * would drag a desktop session to wherever the phone last was. It is not
- * persisted at all — a fix outlives neither the session nor the page.
+ * persisted at all — a fix does not outlive the page.
  */
 class GeoState {
   position = $state<Coordinates | null>(null);
@@ -79,6 +79,22 @@ class GeoState {
 
   stopFollowing(): void {
     this.following = false;
+  }
+
+  /**
+   * Keeps `position` fresh without a session: no ring, no follow lock and no
+   * expiry, because the caller's lifetime bounds it. Returns the stop function.
+   * Starting it from a tracked `$effect` would subscribe that effect to the
+   * state `#requestFix` reads.
+   */
+  watch(): () => void {
+    if (!('geolocation' in navigator)) return () => {};
+
+    this.#requestFix();
+    const timer = setInterval(() => {
+      if (this.status !== 'denied') this.#requestFix();
+    }, FIX_INTERVAL_MS);
+    return () => clearInterval(timer);
   }
 
   /**

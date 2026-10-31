@@ -149,6 +149,41 @@ describe('geoState.stopFollowing', () => {
   });
 });
 
+describe('geoState.watch', () => {
+  it('refreshes the fix without opening a session', () => {
+    answersWith([41.4, 2.1], [41.5, 2.2]);
+    const stop = geoState.watch();
+
+    expect(geoState.position).toEqual({ lat: 41.4, lng: 2.1 });
+    expect(geoState.tracking).toBe(false);
+    expect(geoState.following).toBe(false);
+
+    vi.advanceTimersByTime(30_000);
+    expect(geoState.position).toEqual({ lat: 41.5, lng: 2.2 });
+
+    stop();
+  });
+
+  it('takes no more fixes once stopped', () => {
+    const stop = geoState.watch();
+    stop();
+
+    vi.advanceTimersByTime(5 * 60_000);
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops asking after a refusal', () => {
+    fails(1);
+    const stop = geoState.watch();
+
+    vi.advanceTimersByTime(5 * 60_000);
+    expect(geoState.status).toBe('denied');
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+
+    stop();
+  });
+});
+
 describe('geoState error handling', () => {
   it('stops the session when permission is refused', () => {
     fails(1);
