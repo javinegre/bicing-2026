@@ -64,12 +64,27 @@ describe('planState', () => {
     expect(planState.canAdd(station(3, 'Marina, 236'))).toBe(false);
   });
 
-  it('swaps which leg leads', () => {
+  it('swaps the stations without moving the layout', () => {
     planState.add(rossello);
     planState.add(llull);
+    planState.focus('destination');
     planState.swap();
+    expect(planState.origin).toEqual(llull);
+    expect(planState.destination).toEqual(rossello);
     expect(planState.mode).toBe('destination');
     expect(planState.topGrow).toBe(35);
+  });
+
+  it('toggles which leg leads without touching the stations', () => {
+    planState.add(rossello);
+    planState.add(llull);
+    planState.toggleLead();
+    expect(planState.mode).toBe('destination');
+    expect(planState.topGrow).toBe(35);
+    expect(planState.origin).toEqual(rossello);
+    planState.toggleLead();
+    expect(planState.mode).toBe('origin');
+    expect(planState.topGrow).toBe(65);
   });
 
   it('cancel clears both legs and reopens on the origin', () => {

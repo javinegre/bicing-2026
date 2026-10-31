@@ -17,6 +17,7 @@ export const ICON_NAMES = [
   'bike',
   'bolt',
   'briefcase',
+  'chevron-down',
   'chevron-right',
   'clock',
   'close',

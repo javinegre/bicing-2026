@@ -86,7 +86,12 @@ class PlanState {
     this.mode = 'inactive';
   }
 
+  /** Reverses the trip. `mode` stays put, so the layout does not move with it. */
   swap(): void {
+    [this.origin, this.destination] = [this.destination, this.origin];
+  }
+
+  toggleLead(): void {
     this.mode = this.mode === 'destination' ? 'origin' : 'destination';
   }
 

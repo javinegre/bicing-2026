@@ -95,6 +95,7 @@
         class:bottom={leg.key === 'destination'}
         class:blank={!leg.mapped}
         class:focused={planState.mode === leg.key}
+        class:under-controls={planState.active && leg.key === 'origin'}
         style:flex={leg.grow}
       >
         {#if leg.mapped}
@@ -155,15 +156,26 @@
     {/each}
 
     {#if planState.active}
-      <button
-        type="button"
-        class="swap gradient-accent"
-        style:top="calc({planState.topGrow}% - 22px)"
-        aria-label="Swap which leg leads"
-        onclick={() => planState.swap()}
-      >
-        <Icon name="swap" size={20} />
-      </button>
+      <div class="divider-controls" style:top="calc({planState.topGrow}% - 22px)">
+        <button
+          type="button"
+          class="gradient-accent"
+          aria-label="Swap origin and destination"
+          onclick={() => planState.swap()}
+        >
+          <Icon name="swap" size={20} />
+        </button>
+        <button
+          type="button"
+          class="gradient-accent"
+          aria-label={planState.mode === 'origin' ? 'Enlarge destination' : 'Enlarge origin'}
+          onclick={() => planState.toggleLead()}
+        >
+          <span class="caret" class:up={planState.mode === 'origin'}>
+            <Icon name="chevron-down" size={20} />
+          </span>
+        </button>
+      </div>
     {/if}
   </div>
 </div>
@@ -309,6 +321,11 @@
     min-width: 0;
   }
 
+  /* Clears the second divider button, which overhangs the top leg's foot. */
+  .leg.under-controls .leg-name {
+    padding-right: 34px;
+  }
+
   .leg-name .name {
     display: block;
     font-weight: 600;
@@ -360,10 +377,16 @@
     cursor: pointer;
   }
 
-  .swap {
+  .divider-controls {
     position: absolute;
     right: 14px;
     z-index: 4;
+    display: flex;
+    gap: 8px;
+    transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .divider-controls button {
     width: 44px;
     height: 44px;
     display: flex;
@@ -374,6 +397,16 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
     color: var(--color-ink);
     cursor: pointer;
-    transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .caret {
+    display: flex;
+    transform: scaleY(1);
+    transform-origin: center;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .caret.up {
+    transform: scaleY(-1);
   }
 </style>

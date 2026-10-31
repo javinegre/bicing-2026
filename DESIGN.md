@@ -177,14 +177,17 @@ monospace, and an outlined **Log out**.
 
 Two stacked halves: origin over a bikes map, destination over a docks map.
 
-- Neither set → 50/50, no Cancel, no swap button; each half shows a gradient CTA.
-- Both set → the leading half takes **65%**, the other 35%; a 44px gradient swap
-  button rides the divider at `calc(topGrow% - 22px)`.
-- Tapping a half makes it lead. Swap flips which one leads.
+- Neither set → 50/50, no Cancel, no divider buttons; each half shows a gradient
+  CTA.
+- Both set → the leading half takes **65%**, the other 35%; two 44px gradient
+  buttons ride the divider at `calc(topGrow% - 22px)`.
+- Tapping a half makes it lead. Of the divider buttons, swap exchanges the two
+  stations and leaves the split alone; the caret to its right flips which half
+  leads, pointing up while the origin leads and down while the destination does.
 - **Cancel keeps the origin** and clears the destination — you are usually still
   starting from the same place.
 - Transitions: `flex .35s cubic-bezier(.4,0,.2,1)` on the halves, `top` on the
-  swap button, same curve.
+  divider buttons, same curve.
 
 The maps inside the halves are not built yet; the hatched fill from the design's
 empty state stands in for the tiles.
