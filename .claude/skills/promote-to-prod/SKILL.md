@@ -1,12 +1,12 @@
 ---
 name: promote-to-prod
-description: Promote already-validated staging changes to production — fast-forwards origin/main to origin/staging and builds the result on the droplet's prod bicing-2026 clone at negre.co/bicing-2026/. Use when the user says staging has been validated and is ready to ship to production.
+description: Promote already-validated staging changes to production — fast-forwards origin/main to origin/staging and builds the result on the droplet's prod bicing-2026 clone at negre.co/bicing/. Use when the user says staging has been validated and is ready to ship to production.
 ---
 
 # Promote staging to production
 
 Only run this after `deploy-staging` succeeded and the change was manually
-verified at https://negre.co/staging-bicing-2026/.
+verified at https://negre.co/staging-bicing/.
 
 Runs `promote-to-prod.sh`, which:
 
@@ -24,7 +24,7 @@ Runs `promote-to-prod.sh`, which:
    `/home/javi/negre.co-server/apps/bicing-2026`:
    - `git fetch` + `git reset --hard origin/main`
    - `npm ci`
-   - `BASE_PATH=/bicing-2026/ npm run build`
+   - `BASE_PATH=/bicing/ npm run build`
 6. Checks `pm2 describe negre-co-server` is `online` — as a health check only.
 
 ## Why "rebase" became "fast-forward"
@@ -40,7 +40,7 @@ independently) and it should be investigated rather than papered over.
 
 ## Why there's no PM2 reload
 
-Same reasoning as `deploy-staging`: `/bicing-2026/` also has no nginx alias
+Same reasoning as `deploy-staging`: `/bicing/` also has no nginx alias
 and is mounted as a plain `express.static` in `server.ts`, so a fresh build
 is served immediately without restarting `negre-co-server`.
 

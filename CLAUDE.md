@@ -7,9 +7,9 @@ Guidance for Claude Code (claude.ai/code) working in this repository.
 `bicing-2026` — a Barcelona bike-share map. Plain **Svelte 5 + Vite**, no
 SvelteKit, no router, no SSR: it builds to static files that
 [negre.co-server](https://github.com/javinegre/negre.co-server) serves under
-negre.co. Note that `/bicing-2026/` is served by that router's
+negre.co. Note that `/bicing/` is served by that router's
 `express.static`, not by an nginx alias — only `/files`, `/.well-known`,
-`/bicing/` and `/bicing-2021/` have alias blocks there.
+`/bicing-2023/` and `/bicing-2021/` have alias blocks there.
 
 It is its own git repo, checked out as a sibling under that router's `apps/`
 directory. That parent repo gitignores `apps/`, which has one consequence worth
@@ -39,11 +39,11 @@ Node 24 (`.nvmrc`) — Vite 8 needs ≥20.19. `cp .env.sample .env` and add a Go
 Maps browser key before `npm run dev`; without one every screen still works and
 the map shows an explanatory message.
 
-`BASE_PATH=/bicing-2026/ npm run build` to deploy alongside the 2023 app.
+The default base path is `/bicing/`; override it with `BASE_PATH`.
 
-There is a **staging deploy** at `https://negre.co/staging-bicing-2026/` — a
+There is a **staging deploy** at `https://negre.co/staging-bicing/` — a
 second clone of this repo at `apps/staging-bicing-2026` on the droplet, built
-in place with `APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build`.
+in place with `APP_ENV=staging BASE_PATH=/staging-bicing/ npm run build`.
 `APP_ENV` (default `production`, also accepts `development` — reserved for a
 future local-laptop setup, not wired to anything yet) is a separate knob from
 `BASE_PATH` — it stamps `__APP_ENV__` (`vite.config.ts`), which drives the

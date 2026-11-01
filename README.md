@@ -28,10 +28,9 @@ npm run dev
 | `npm test` / `test:watch`         | Vitest                                                       |
 | `npm run validate`                | `format:check && lint && check && test` — what CI should run |
 
-`BASE_PATH=/bicing-2026/ npm run build` while this runs alongside the 2023 app;
-the default is `/bicing/`.
+The default base path is `/bicing/`; override it with `BASE_PATH`.
 
-A staging build lives at `https://negre.co/staging-bicing-2026/` — see
+A staging build lives at `https://negre.co/staging-bicing/` — see
 [Deploying](#deploying).
 
 ## Stack, and why
@@ -200,18 +199,18 @@ Things that cost real time to rediscover, and how this repo handles them.
 
 ## Deploying
 
-Built as static files, mounted by negre.co-server. Note that `/bicing-2026/`
-is currently served by that router's `express.static`, not by an nginx alias —
-only `/files`, `/.well-known`, `/bicing/` and `/bicing-2021/` have alias blocks
-in `nginx/negre.co.conf`.
+Built as static files, mounted by negre.co-server. Note that `/bicing/`
+is served by that router's `express.static`, not by an nginx alias —
+only `/files`, `/.well-known`, `/bicing-2023/` and `/bicing-2021/` have alias
+blocks in `nginx/negre.co.conf`.
 
 ### Staging
 
-`https://negre.co/staging-bicing-2026/` is a second clone of this repo at
+`https://negre.co/staging-bicing/` is a second clone of this repo at
 `apps/staging-bicing-2026` on the droplet, developed on and built in place:
 
 ```sh
-APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build
+APP_ENV=staging BASE_PATH=/staging-bicing/ npm run build
 ```
 
 `APP_ENV=staging` stamps `__APP_ENV__` (`vite.config.ts`), which the app reads

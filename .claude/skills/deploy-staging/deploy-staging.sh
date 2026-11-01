@@ -36,7 +36,7 @@ git status --short || true
 git fetch origin staging
 git reset --hard origin/staging
 npm ci
-APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build
+APP_ENV=staging BASE_PATH=/staging-bicing/ npm run build
 
 echo "--> Build complete. staging-bicing-2026 has no nginx alias and is served" \
      "by server.ts's plain express.static mount, which stats files per request" \
@@ -49,4 +49,4 @@ else
 fi
 EOF
 
-echo "==> Done. https://negre.co/staging-bicing-2026/"
+echo "==> Done. https://negre.co/staging-bicing/"

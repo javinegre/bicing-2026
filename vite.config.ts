@@ -20,7 +20,7 @@ function appVersion(): string {
 
 /**
  * Which deploy this bundle is. Set explicitly via `APP_ENV` (e.g.
- * `APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build`) rather
+ * `APP_ENV=staging BASE_PATH=/staging-bicing/ npm run build`) rather
  * than derived from BASE_PATH, so the two stay independent knobs — a local
  * build against a staging-like path doesn't silently flip this. Without an
  * explicit `APP_ENV`, `vite`'s own dev-vs-build `mode` picks `development`
@@ -48,8 +48,8 @@ export default defineConfig(({ mode }) => {
     publicDir: env === 'staging' ? 'public-staging' : 'public',
 
     // negre.co-server mounts each app under a path prefix (nginx serves dist/
-    // directly), so built asset URLs have to carry it. Override with
-    // BASE_PATH=/bicing-2026/ while this runs alongside the 2023 app.
+    // directly), so built asset URLs have to carry it. Staging overrides it
+    // with BASE_PATH=/staging-bicing/.
     base: mode === 'production' ? (process.env.BASE_PATH ?? '/bicing/') : '/',
 
     plugins: [

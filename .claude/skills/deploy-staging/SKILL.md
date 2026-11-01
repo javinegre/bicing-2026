@@ -1,6 +1,6 @@
 ---
 name: deploy-staging
-description: Push the current local bicing-2026 work to origin's staging branch and build it on the droplet's staging-bicing-2026 clone at negre.co/staging-bicing-2026/. Use when the user asks to deploy, ship, or push the app to staging.
+description: Push the current local bicing-2026 work to origin's staging branch and build it on the droplet's staging-bicing-2026 clone at negre.co/staging-bicing/. Use when the user asks to deploy, ship, or push the app to staging.
 ---
 
 # Deploy to staging
@@ -18,12 +18,12 @@ Runs `deploy-staging.sh`, which:
    - `git fetch` + `git reset --hard origin/staging` (this clone should never
      have local edits; `reset --hard` is intentional)
    - `npm ci`
-   - `APP_ENV=staging BASE_PATH=/staging-bicing-2026/ npm run build`
+   - `APP_ENV=staging BASE_PATH=/staging-bicing/ npm run build`
 5. Checks `pm2 describe negre-co-server` is `online` — as a health check only.
 
 ## Why there's no PM2 reload
 
-`/staging-bicing-2026/` has no nginx alias (see negre.co-server's
+`/staging-bicing/` has no nginx alias (see negre.co-server's
 `CLAUDE.md`) and is mounted in `server.ts` as a plain
 `express.static(.../staging-bicing-2026/dist)`. `express.static` stats files
 per request rather than caching a directory listing at process start, so a
@@ -38,4 +38,4 @@ bash .claude/skills/deploy-staging/deploy-staging.sh
 ```
 
 After it finishes, manually verify at
-https://negre.co/staging-bicing-2026/ before running `promote-to-prod`.
+https://negre.co/staging-bicing/ before running `promote-to-prod`.

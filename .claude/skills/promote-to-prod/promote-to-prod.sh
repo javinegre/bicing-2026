@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fast-forward origin/main to origin/staging (once staging has been manually
-# validated at https://negre.co/staging-bicing-2026/), then build the result
+# validated at https://negre.co/staging-bicing/), then build the result
 # on the droplet's prod bicing-2026 clone. See SKILL.md for the reasoning.
 set -euo pipefail
 
@@ -46,7 +46,7 @@ git status --short || true
 git fetch origin main
 git reset --hard origin/main
 npm ci
-BASE_PATH=/bicing-2026/ npm run build
+BASE_PATH=/bicing/ npm run build
 
 echo "--> Build complete. bicing-2026 has no nginx alias and is served by" \
      "server.ts's plain express.static mount, which stats files per request" \
@@ -59,4 +59,4 @@ else
 fi
 EOF
 
-echo "==> Done. https://negre.co/bicing-2026/"
+echo "==> Done. https://negre.co/bicing/"

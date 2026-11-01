@@ -19,7 +19,7 @@ describe('tabFromPath', () => {
     expect(tabFromPath('/nope', '/')).toBe('map');
   });
 
-  for (const base of ['/bicing-2026/', '/staging-bicing-2026/']) {
+  for (const base of ['/bicing/', '/staging-bicing/']) {
     it(`resolves tabs under base ${base}`, () => {
       expect(tabFromPath(`${base}plan`, base)).toBe('plan');
       expect(tabFromPath(base, base)).toBe('map');
@@ -29,7 +29,7 @@ describe('tabFromPath', () => {
   }
 
   it('falls back to map for a path under a different base', () => {
-    expect(tabFromPath('/other-app/plan', '/bicing-2026/')).toBe('map');
+    expect(tabFromPath('/other-app/plan', '/bicing/')).toBe('map');
   });
 });
 
@@ -40,8 +40,8 @@ describe('pathForTab', () => {
   });
 
   it('builds paths under a prefixed base', () => {
-    expect(pathForTab('map', '/bicing-2026/')).toBe('/bicing-2026/');
-    expect(pathForTab('search', '/bicing-2026/')).toBe('/bicing-2026/search');
+    expect(pathForTab('map', '/bicing/')).toBe('/bicing/');
+    expect(pathForTab('search', '/bicing/')).toBe('/bicing/search');
   });
 });
 
@@ -74,13 +74,13 @@ describe('buildUrl', () => {
   const dangerousValues = ['<script>alert(1)</script>', 'a&b', '#frag', '"quoted"', 'space here'];
 
   it.each(dangerousValues)('round-trips %j without corrupting the URL', (value) => {
-    const built = buildUrl('search', value, '/bicing-2026/');
+    const built = buildUrl('search', value, '/bicing/');
 
     expect(built).not.toContain('<script>');
     expect(built).not.toContain('"');
 
     const url = new URL(built, 'http://example.test');
-    expect(tabFromPath(url.pathname, '/bicing-2026/')).toBe('search');
+    expect(tabFromPath(url.pathname, '/bicing/')).toBe('search');
     expect(readSearchQuery(url.search)).toBe(value);
   });
 });
