@@ -4,6 +4,8 @@
   import { geoState } from '$lib/state/geo.svelte';
   import { mapState } from '$lib/state/map.svelte';
   import { prefsState } from '$lib/state/prefs.svelte';
+  import { smouUrl } from '$lib/domain/smou';
+  import smouIcon from '$lib/icons/misc/smou.png';
   import type { BookmarkType } from '$lib/domain/types';
   import type { IconName } from '$lib/icons';
 
@@ -22,6 +24,10 @@
         ? 'Stop tracking my location'
         : 'Recentre on my location',
   );
+
+  // An intent hands off to another app and leaves this page where it was; in a
+  // new tab it would strand an empty one behind.
+  const smouHref = smouUrl(navigator.userAgent);
 
   /**
    * One control, two jobs: jump to a bookmark that exists, or set one from the
@@ -86,6 +92,16 @@
       </button>
     {/each}
   </div>
+
+  <a
+    class="smou"
+    href={smouHref}
+    target={smouHref.startsWith('intent:') ? undefined : '_blank'}
+    rel="noopener noreferrer"
+    aria-label="Open Smou to unlock a bike"
+  >
+    <img src={smouIcon} alt="" width="44" height="44" />
+  </a>
 </div>
 
 <style>
@@ -203,5 +219,20 @@
   .rule {
     height: 1px;
     background: var(--color-hairline);
+  }
+
+  /* Smou's own artwork, so no glass chrome — just the controls' silhouette and
+     shadow, so it lines up with the stack above it. */
+  .smou {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-surface);
+    overflow: hidden;
+    box-shadow: var(--shadow-control);
+  }
+
+  .smou img {
+    display: block;
   }
 </style>
